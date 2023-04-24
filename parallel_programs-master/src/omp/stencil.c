@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <sys/time.h>
 #include <immintrin.h>
+#include <omp.h>
 
 #define REAL double
 
@@ -25,23 +26,34 @@ void Stencil(REAL **in, REAL **out, size_t n, int iterations)
     (*out)[0] = (*in)[0];
     (*out)[n - 1] = (*in)[n - 1];
 
+    omp_set_num_threads(4); //CHANGE THE NUMBER OF THREADS TO TEST
+
+    //prolly cant use a for loop pragma here
     for (int t = 1; t <= iterations; t++) {
         /* Update only the inner values. */
+        #pragma omp parallel for schedule(static)
 
-        /* For every i, we perform 5flops (2 addition and 3 multiplication operations )*/
-        /* So our total Gflops/s = iterations * (n-1) * 5 / 1000000000 /duration*/
-        for (int i = 1; i < n - 1; i++) {
-            (*out)[i] = a * (*in)[i - 1] +
-                        b * (*in)[i] +
-                        c * (*in)[i + 1];
-        }
+        /* 
+            For every i, we perform 5flops (2 addition and 3 multiplication operations )
+            Our total Gflops/s = iterations * (n-1) * 5 / 1000000000 /duration when we executedd it sequentially
+            However, now we can divide by the number of threads as well, so if omp_set_num_threads(4) we get that 
+            Gflops/s = iterations * (n-1) * 5 / 1000000000 /duration/ 4      
+        */
+        
+            for (int i = 1; i < n - 1; i++) {
+                REAL val = a * (*in)[i - 1] + b * (*in)[i] + c * (*in)[i + 1]; 
+                (*out)[i] = val; 
+                            
+            }
 
-        /* The output of this iteration is the input of the next iteration (if there is one). */
-        if (t != iterations) {
-            REAL *temp = *in;
-            *in = *out;
-            *out = temp;
-        }
+            /* The output of this iteration is the input of the next iteration (if there is one). */
+            if (t != iterations) {
+                REAL *temp = *in;
+                *in = *out;
+                *out = temp;
+            }
+        
+
     }
 }
 
