@@ -15,7 +15,7 @@ for P in 1 2 4 8 16 32; do
         for n in 500 5000 50000 500000 5000000 50000000; do 
         "n: "${n} > results/stencil_omp_"$P".txt
             for i in 1 2 3 4 5; do
-                OMP_NUM_THREADS="$P" bin/stencil_omp 10000 100 > results/stencil_omp_"$P".txt
+                OMP_NUM_THREADS="$P" bin/stencil_omp ${n} ${iterations} > results/stencil_omp_"$P".txt
             done
             echo "FINISHED MEASUREMENTS OF "${iterations} " , " ${n} 
         done
