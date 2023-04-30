@@ -9,6 +9,15 @@
 # Compile on the machine, not the head node
 make bin/stencil_omp
 
-for P in 1 2 3 4 5 6; do
-    OMP_NUM_THREADS="$P" bin/stencil_omp 10000 100 > results/stencil_omp_"$P".txt
+for P in 1 2 4 8 16 32; do
+    for iterations in 1000 10000; do
+        "Iterations: "${iterations} > results/stencil_omp_"$P".txt
+        for n in 500 5000 50000 500000 5000000 50000000; do 
+        "n: "${n} > results/stencil_omp_"$P".txt
+            for i in 1 2 3 4 5; do
+                OMP_NUM_THREADS="$P" bin/stencil_omp 10000 100 > results/stencil_omp_"$P".txt
+            done
+            echo "FINISHED MEASUREMENTS OF "${iterations} " , " ${n} 
+        done
+    done
 done
