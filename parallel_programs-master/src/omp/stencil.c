@@ -26,7 +26,7 @@ void Stencil(REAL **in, REAL **out, size_t n, int iterations)
     (*out)[0] = (*in)[0];
     (*out)[n - 1] = (*in)[n - 1];
 
-    omp_set_num_threads(4); //CHANGE THE NUMBER OF THREADS TO TEST
+    omp_set_num_threads(omp_get_num_threads()); //CHANGE THE NUMBER OF THREADS TO TEST
 
     //prolly cant use a for loop pragma here
     for (int t = 1; t <= iterations; t++) {
