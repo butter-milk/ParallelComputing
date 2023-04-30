@@ -12,12 +12,14 @@ make bin/stencil_omp
 for P in 1 2 4 8 16 32; do
     for iterations in 1000 10000; do
         echo "Iterations: "${iterations} "\n" >> results/stencil_omp_"$P".txt
-        for n in 500 5000 50000 500000 5000000 50000000; do 
+        for n in 500 ; do 
         echo "n: "${n} "\n" >> results/stencil_omp_"$P".txt
             for i in 1 2 3 4 5; do
-                echo OMP_NUM_THREADS="$P" bin/stencil_omp ${n} ${iterations} "\n">> results/stencil_omp_"$P".txt
+                OMP_NUM_THREADS="$P" bin/stencil_omp ${n} ${iterations} >> results/stencil_om>
+                "\n" >> results/stencil_omp_"$P".txt
             done
             echo "FINISHED MEASUREMENTS OF "${iterations} " , " ${n} 
         done
     done
 done
+
