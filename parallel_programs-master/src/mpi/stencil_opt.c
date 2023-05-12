@@ -97,20 +97,20 @@ void StencilBlocked(REAL **in, REAL **out, size_t n, int iterations, int my_rank
     REAL *inBuffer = malloc((SPACEBLOCK + 2 * iterations) * sizeof(REAL));
     REAL *outBuffer = malloc((SPACEBLOCK + 2 * iterations) * sizeof(REAL));
     if (my_rank!=0) {
-        double a, b;
-        a = in[1];  
-        MPI_Send(&a, 1, MPI_DOUBLE, my_rank-1, 0, MPI_COMM_WORLD);
-        MPI_Recv(&b, 1, MPI_DOUBLE, my_rank-1, 0, MPI_COMM_WORLD);
-        in[0] = b;
+        double x, y;
+        x = *in[1];  
+        MPI_Send(&x, 1, MPI_DOUBLE, my_rank-1, 0, MPI_COMM_WORLD);
+        MPI_Recv(&y, 1, MPI_DOUBLE, my_rank-1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        *in[0] = y;
         /*get last element of previous rank*/
         /*send element to last index of the previous rank, if not last rank*/
         }
     if (my_rank!= p-1) {
-        double a, b;
-        b= in[n-2]
-        MPI_Recv(&a, 1, MPI_DOUBLE, my_rank+1, 0, MPI_COMM_WORLD);
-        in[n-1] = a;
-        MPI_Send(&b, 1, MPI_DOUBLE, my_rank-1, 0, MPI_COMM_WORLD);
+        double x, y;
+        y= *in[n-2];
+        MPI_Recv(&x, 1, MPI_DOUBLE, my_rank+1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        *in[n-1] = x;
+        MPI_Send(&y, 1, MPI_DOUBLE, my_rank-1, 0, MPI_COMM_WORLD);
         /*get first element of next rank*/
         /*send element to first index of the next rank, if not last rank*/
         }
@@ -216,19 +216,23 @@ int main(int argc, char **argv)
 
     
     MPI_Init(&argc, &argv);
-    //assuming that p divides n
+    /*
+    assuming that p divides n, so if we use 1,2,4,8,16,32 threads, n should always divide 32!
+    furthermore, n should divide SPACEBLOCK as well, meaning that n should be a multiple of lcm(32,1000) = 4000
+    */
     int my_rank, p;
     REAL *in = calloc(n/p + 2, sizeof(REAL));
     REAL *out = malloc((n/p +2) * sizeof(REAL));
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &p);
+    printf("Number of threads %d", p);
     if (my_rank==0){in[0] = 100;}
     if (my_rank*n/p <= n/2 && (my_rank+1)*n/p >= n/2){in[n/2] = n;}
     if (my_rank == p-1){in[n-1]=1000;}
     double duration;
     TIME(duration, Stencil(&in, &out, n/p, iterations, my_rank, p););
-    MPI_Finalize();
     printf("Faster version took %lfs, or %lf Gflops/s\n", duration, iterations * (n-2) * 5 / 1000000000 /duration);
+    MPI_Finalize();
     
 #ifdef CHECK
     REAL *in2 = calloc(n, sizeof(REAL));
