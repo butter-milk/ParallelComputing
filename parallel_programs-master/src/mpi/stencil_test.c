@@ -214,13 +214,13 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
-    
+    int my_rank, p;
     MPI_Init(&argc, &argv);
     /*
     assuming that p divides n, so if we use 1,2,4,8,16,32 threads, n should always divide 32!
     furthermore, n should divide SPACEBLOCK as well, meaning that n should be a multiple of lcm(32,1000) = 4000
     */
-    int my_rank, p;
+    
     REAL *in = calloc(n/p + 2, sizeof(REAL));
     REAL *out = malloc((n/p +2) * sizeof(REAL));
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
