@@ -250,7 +250,7 @@ int main(int argc, char **argv)
     if (my_rank == p-1) {in[n-1]=1000;}
     double duration;
     TIME(duration, Stencil(&in, &out, n/p, iterations, my_rank, p););
-    if(my_rank==0){printf("Faster version took %lfs, or %lf Gflops/s\n", duration, iterations * (n-2) * 5 / 1000000000 /duration);}
+    if(my_rank==0){printf("%lf, %lf\n", duration, iterations * (n-2) * 5 / 1000000000 /duration);}
     MPI_Finalize();
     
 #ifdef CHECK
