@@ -1,1 +1,1 @@
-Number of threads 4Faster version took 11.608088s, or 68.831318 Gflops/s
+Number of threads 4Faster version took 13.420412s, or 59.536175 Gflops/s

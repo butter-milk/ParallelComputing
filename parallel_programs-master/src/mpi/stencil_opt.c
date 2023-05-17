@@ -97,7 +97,18 @@ void StencilBlocked(REAL **in, REAL **out, size_t n, int iterations, int my_rank
     REAL *inBuffer = malloc((SPACEBLOCK + 2 * iterations) * sizeof(REAL));
 
     REAL *outBuffer = malloc((SPACEBLOCK + 2 * iterations) * sizeof(REAL));
-    if (my_rank < p-1) {
+    if (my_rank == 0){
+        double x, y;
+        y= (*in)[n-2];
+        MPI_Recv(&x, 1, MPI_DOUBLE, my_rank+1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        (*in)[n-1] = x;
+        MPI_Send(&y, 1, MPI_DOUBLE, my_rank+1, 0, MPI_COMM_WORLD);
+        /*
+        get first element of next rank
+        send element to first index of the next rank, if not last rank
+        */
+    }
+    if (my_rank < p-1 && my_rank != 0) {
         double x, y;
         y= (*in)[n-2];
         MPI_Recv(&x, 1, MPI_DOUBLE, my_rank+1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
