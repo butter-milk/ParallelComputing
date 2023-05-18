@@ -19,4 +19,4 @@ for threads in 1 2 4 8 16 32; do
         for iterations in 1000 10000 100000; do
             echo "iterations: ${iterations}" > results/stencil_opt_mpi_t${threads}.txt
             for measurement in 1 2 3 4 5; do
-                mpirun -N ${threads} bin/stencil_opt_mpi ${n} 400000 >> results/stencil_opt_mpi_t"${threads}".txt
+                mpirun -N ${threads} bin/stencil_opt_mpi ${n} ${iterations} >> results/stencil_opt_mpi_t"${threads}".txt
