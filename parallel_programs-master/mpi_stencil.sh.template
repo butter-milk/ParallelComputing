@@ -7,7 +7,7 @@
 #SBATCH --threads-per-core=1
 #SBATCH --partition=csmpi_short
 #SBATCH --time=00:05:00
-#SBATCH --output=hello_mpi_NTASKS.out
+#SBATCH --output=stencil_mpi_NTASKS.out
 
 # Compile on the machine, not the head node
 make bin/stencil_opt_mpi
