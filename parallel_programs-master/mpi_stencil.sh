@@ -5,6 +5,7 @@ NODES=1
 if [ $# -lt 2 ]
     then
         echo "Supply 'n' and 'iterations' please"
+        exit 1
 fi
 
 
