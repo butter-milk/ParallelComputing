@@ -11,7 +11,7 @@ fi
 
 while [ $NODES -le 8 ]
 do
-    for EXPRM in {1..5}
+    for EXPRM in 1 2 3 4 5;
     do
         NTASKS=$(( 8 * NODES ))
         
