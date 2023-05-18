@@ -10,6 +10,6 @@
 #SBATCH --output=hello_mpi_NTASKS.out
 
 # Compile on the machine, not the head node
-make bin/hello_world_mpi
+make bin/stencil_mpi
 
-mpirun bin/hello_world_mpi > results/hello_mpi_NTASKS.txt
+mpirun bin/stencil_mpi LEN ITER > results/mpi_stencil_NTASKS_EXPRM.txt

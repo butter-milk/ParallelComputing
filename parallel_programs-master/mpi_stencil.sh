@@ -1,22 +1,27 @@
 #!/bin/sh
 
-#SBATCH --account=csmpi
-#SBATCH --ntasks=NTASKS
-#SBATCH --nodes=NODES
-#SBATCH --ntasks-per-node=8
-#SBATCH --threads-per-core=1
-#SBATCH --partition=csmpi_short
-#SBATCH --time=00:05:00
-#SBATCH --output=hello_mpi_NTASKS.out
+NODES=1
 
-# Compile on the machine, not the head node
-make bin/stencil_opt_mpi
+if [ $# -lt 2 ]
+    then
+        echo "Supply 'n' and 'iterations' please"
+fi
 
-for threads in 1 2 4 8 16 32; do
-    echo "" > results/stencil_opt_mpi_t${threads}.txt
-    for n in 4000 200000 100000 500000 5000000 50000000; do
-        echo "n: ${n}" > results/stencil_opt_mpi_t${threads}.txt
-        for iterations in 1000 10000 100000; do
-            echo "iterations: ${iterations}" > results/stencil_opt_mpi_t${threads}.txt
-            for measurement in 1 2 3 4 5; do
-                mpirun -N ${threads} bin/stencil_opt_mpi ${n} ${iterations} >> results/stencil_opt_mpi_t"${threads}".txt
+
+while [ $NODES -le 8 ]
+do
+    for EXPRM in {1..5}
+        NTASKS=$(( 8 * NODES ))
+        
+        sed "s/NODES/$NODES/g" mpi_stencil.sh.template > mpi_stencil_"$NTASKS".sh
+        sed -i "s/NTASKS/$NTASKS/g" mpi_stencil_"$NTASKS".sh
+        sed -i "s/EXPRM/$EXPRM/g" mpi_stencil_"$NTASKS".sh
+        sed -i "s/LEN/$1/g" mpi_stencil_"$NTASKS".sh
+        sed -i "s/ITER/$2/g" mpi_stencil_"$NTASKS".sh
+        sbatch mpi_stencil_"$NTASKS".sh
+
+        rm mpi_stencil_"$NTASKS".sh
+
+        NODES=$(( 2 * NODES ))
+    
+done
