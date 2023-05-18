@@ -12,5 +12,4 @@
 # Compile on the machine, not the head node
 make bin/stencil_opt_mpi
 
-echo EXPRM >> results/mpi_stencil_NTASKS_LEN_ITER.txt
 mpirun bin/stencil_opt_mpi LEN ITER >> results/mpi_stencil_NTASKS_LEN_ITER.txt
