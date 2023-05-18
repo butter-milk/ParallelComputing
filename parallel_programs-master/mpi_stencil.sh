@@ -11,6 +11,7 @@ fi
 while [ $NODES -le 8 ]
 do
     for EXPRM in {1..5}
+    do
         NTASKS=$(( 8 * NODES ))
         
         sed "s/NODES/$NODES/g" mpi_stencil.sh.template > mpi_stencil_"$NTASKS".sh
@@ -23,5 +24,5 @@ do
         rm mpi_stencil_"$NTASKS".sh
 
         NODES=$(( 2 * NODES ))
-    
+    done
 done
