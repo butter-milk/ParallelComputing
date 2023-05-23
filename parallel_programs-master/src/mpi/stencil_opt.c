@@ -251,8 +251,8 @@ int main(int argc, char **argv)
     
     if (my_rank==0) {in[0] = 100;}
     if (my_rank*n/p <= n/2 && (my_rank+1)*n/p >= n/2){
-        if (my_rank==0){in[n/2-my_rank*(n/p+2*TIMEBLOCK)] = n;}
-        else{ in[n/2-my_rank*(n/p+TIMEBLOCK)] = n;}
+        if (my_rank==0){in[n/2-my_rank*(n/p+TIMEBLOCK)] = n;}
+        else{ in[n/2-my_rank*(n/p+2*TIMEBLOCK)] = n;}
         }
     if (my_rank == p-1) {in[n+iterations-1]=1000;}
     double duration;
