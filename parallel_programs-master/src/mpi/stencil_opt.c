@@ -155,6 +155,57 @@ void StencilBlocked(REAL **in, REAL **out, size_t n, int iterations, int my_rank
 
 void Stencil(REAL **in, REAL **out, size_t n, int iterations, int my_rank, int p)
 {
+    REAL *x = calloc(TIMEBLOCK, sizeof(REAL));
+    REAL *y = calloc(TIMEBLOCK, sizeof(REAL));
+    REAL *ay = calloc(TIMEBLOCK, sizeof(REAL));
+    REAL *ax = calloc(TIMEBLOCK, sizeof(REAL));
+    for(int i = 0; i < TIMEBLOCK; i+=1){
+        // TIMEBLOCK  TIMEBLOCK n/p-2TIMEBLOCK TIMEBLOCK TIMEBLOCK
+        //      ax       ay                       x        y
+        x[i] = (my_rank+1)*(n-2*TIMEBLOCK)+i 
+        y[i] = (my_rank+1)*(n-TIMEBLOCK)+i
+        ax[i] = my_rank*(n-2*TIMEBLOCK)+i 
+        ay[i] = my_rank*(n-TIMEBLOCK)+i 
+
+    }
+    
+    
+    if(my_rank == 0){
+        //FIRST SEND, THEN RECEIVE
+
+        
+        // we only need to send/receive when multiple threads are used.
+        if(my_rank != p-1){
+            MPI_Send(&x, TIMEBLOCK, MPI_DOUBLE, my_rank+1,0, MPI_COMM_WORLD);
+            MPI_Recv(&y, TIMEBLOCK, MPI_DOUBLE, my_rank+1,0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            for(int i = 0; i < TIMEBLOCK; i++){
+                (*in)[n-TIMEBLOCK+i] = ax[i];
+            }
+        }
+    }else{
+        //FIRST RECEIVE, THEN SEND only sending if my_rank!= p-1
+        if(my_rank % 2 == 1){
+            // ODD threadno
+            MPI_Recv(&x, TIMEBLOCK, MPI_DOUBLE, my_rank-1,0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            for(int i = 0; i < TIMEBLOCK; i++){
+                (*in)[(my_rank+1)*(n-2*TIMEBLOCK)+i] = x[i]; 
+            }
+            MPI_Send(&y, TIMEBLOCK, MPI_DOUBLE, my_rank-1,0, MPI_COMM_WORLD);
+            if(my_rank != p-1){
+                MPI_Send(&ax, TIMEBLOCK, MPI_DOUBLE, my_rank+1,0, MPI_COMM_WORLD);
+                MPI_Recv(&ay, TIMEBLOCK, MPI_DOUBLE, my_rank+1,0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                for(int i = 0; i < TIMEBLOCK; i++){
+                    (*in)[n-TIMEBLOCK+i] = ay[i];
+                }
+            }
+        } else { 
+            // EVEN threadno
+            MPI_Recv(&ay, TIMEBLOCK, MPI_DOUBLE, my_rank-1,0, MPI_COMM_WORLD, MPI_STATUS_IGNORE); 
+
+        }
+        
+    }
+    
     int rest_iters = iterations % TIMEBLOCK;
     if (rest_iters != 0) {
         StencilBlocked(in, out, n, rest_iters, my_rank,p);
@@ -242,14 +293,11 @@ int main(int argc, char **argv)
     MPI_Comm_size(MPI_COMM_WORLD, &p);
 
     // Add Size checks
-
+    int size;
     REAL *in, *out;
-    if (p == 1) {
-        print("We assume at least 2 threads");
-        return EXIT_FAILURE;
-    }
     if (my_rank == 0 || my_rank == p - 1){
         // If were dealing with either of the ends of the array, we only need to deal overlap on one side
+        size = n/p + TIMEBLOCK
         REAL *in = calloc(n/p + TIMEBLOCK, sizeof(REAL));
         REAL *out = malloc((n/p +TIMEBLOCK) * sizeof(REAL));
         if (my_rank == 0) {
@@ -269,6 +317,7 @@ int main(int argc, char **argv)
         }
     } else {
         // In a middle block, we have overlap on two sides, so we allocate 2 * timeblock as buffer
+        size = n/p + 2*TIMEBLOCK
         REAL *in = calloc(n/p + 2*TIMEBLOCK, sizeof(REAL));
         REAL *out = malloc((n/p +2*TIMEBLOCK) * sizeof(REAL));
 
@@ -280,7 +329,7 @@ int main(int argc, char **argv)
     }
     
     double duration;
-    TIME(duration, Stencil(&in, &out, n/p+2, iterations, my_rank, p););
+    TIME(duration, Stencil(&in, &out, size, iterations, my_rank, p););
     if(my_rank==0){printf("%lf %lf\n", duration, iterations * (n-2) * 5 / 1000000000 /duration);}
     MPI_Finalize();
     
