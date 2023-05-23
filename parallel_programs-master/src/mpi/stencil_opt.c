@@ -240,16 +240,19 @@ int main(int argc, char **argv)
     int my_rank, p;
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &p);
-
-    REAL *in = calloc(n/p + 2, sizeof(REAL));
-    REAL *out = malloc((n/p +2) * sizeof(REAL));
-
+    if (my_rank == 0 || my_rank == p-1){
+        REAL *in = calloc(n/p + iterations, sizeof(REAL));
+        REAL *out = malloc((n/p +iterations) * sizeof(REAL));
+    }else{
+        REAL *in = calloc(n/p + 2*iterations, sizeof(REAL));
+        REAL *out = malloc((n/p +2*iterations) * sizeof(REAL));
+    }
     
     if (my_rank==0) {in[0] = 100;}
-    if (my_rank*n/p <= n/2 && (my_rank+1)*n/p >= n/2){in[n/2-my_rank*n/p] = n;}//THIS IS CORRECT SINCE N IS ASSUMED TO BE DIVIDED BY 32
-    if (my_rank == p-1) {in[n-1]=1000;}
+    if (my_rank*n/p <= n/2 && (my_rank+1)*n/p >= n/2){in[n/2-my_rank*(n/p+2*iterations)] = n;}//THIS IS CORRECT SINCE N IS ASSUMED TO BE DIVIDED BY 32
+    if (my_rank == p-1) {in[n+iterations-1]=1000;}
     double duration;
-    TIME(duration, Stencil(&in, &out, n/p, iterations, my_rank, p););
+    TIME(duration, Stencil(&in, &out, n/p+2, iterations, my_rank, p););
     if(my_rank==0){printf("%lf %lf\n", duration, iterations * (n-2) * 5 / 1000000000 /duration);}
     MPI_Finalize();
     
