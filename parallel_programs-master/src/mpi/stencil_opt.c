@@ -242,8 +242,8 @@ int main(int argc, char **argv)
     if (my_rank == 0 || my_rank == p - 1){
         // If were dealing with either of the ends of the array, we only need to deal overlap on one side
         size = n/p + TIMEBLOCK; 
-        REAL *in = calloc(size,  sizeof(REAL));
-        REAL *out = malloc(size * sizeof(REAL));
+        in = calloc(size,  sizeof(REAL));
+        out = malloc(size * sizeof(REAL));
         if (my_rank == 0) {
             in[0] = 100;
         }
@@ -262,8 +262,8 @@ int main(int argc, char **argv)
     } else {
         // In a middle block, we have overlap on two sides, so we allocate 2 * timeblock as buffer
         size = n/p + 2*TIMEBLOCK ;
-        REAL *in = calloc(n/p + 2*TIMEBLOCK, sizeof(REAL));
-        REAL *out = malloc((n/p +2*TIMEBLOCK) * sizeof(REAL));
+        in = calloc(n/p + 2*TIMEBLOCK, sizeof(REAL));
+        out = malloc((n/p +2*TIMEBLOCK) * sizeof(REAL));
 
         // The first and the last element don't need to be set, because that is in either the first or the last threads
         // Check if this thread contains the middle element
