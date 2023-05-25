@@ -251,6 +251,9 @@ int main(int argc, char **argv)
     double duration;
     TIME(duration, Stencil(&in, &out, n/p, iterations, my_rank, p););
     if(my_rank==0){printf("%lf %lf\n", duration, iterations * (n-2) * 5 / 1000000000 /duration);}
+
+    free(in);
+    free(out);
     MPI_Finalize();
     
 #ifdef CHECK
@@ -269,8 +272,7 @@ int main(int argc, char **argv)
     free(out2);
 #endif
 
-    free(in);
-    free(out);
+
 
     return EXIT_SUCCESS;
 }
