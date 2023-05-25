@@ -92,52 +92,24 @@ void Right(REAL **in, REAL **out, size_t n, int iterations)
     }
 }
 
-void StencilBlocked(REAL **in, REAL **out, size_t n, int iterations, int my_rank, int p)
+void StencilBlocked(REAL **in, REAL **out, size_t size, int iterations, int my_rank, int p)
 {
     REAL *inBuffer = malloc((SPACEBLOCK + 2 * iterations) * sizeof(REAL));
-
     REAL *outBuffer = malloc((SPACEBLOCK + 2 * iterations) * sizeof(REAL));
-    if (my_rank == 0 && p!=1){
-        double x, y;
-        y= (*in)[n-2];
-        MPI_Recv(&x, 1, MPI_DOUBLE, my_rank+1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        (*in)[n-1] = x;
-        MPI_Send(&y, 1, MPI_DOUBLE, my_rank+1, 0, MPI_COMM_WORLD);
-        /*
-        get first element of next rank
-        send element to first index of the next rank, if not last rank
-        */
-    }
-    if (my_rank < p-1 && my_rank != 0) {
-        double x, y;
-        y= (*in)[n-2];
-        MPI_Recv(&x, 1, MPI_DOUBLE, my_rank+1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        (*in)[n-1] = x;
-        MPI_Send(&y, 1, MPI_DOUBLE, my_rank+1, 0, MPI_COMM_WORLD);
-        /*
-        get first element of next rank
-        send element to first index of the next rank, if not last rank
-        */
-    }
-    if (my_rank > 0) {
-        double x, y;
-        x = (*in)[1];  
-        MPI_Send(&x, 1, MPI_DOUBLE, my_rank-1, 0, MPI_COMM_WORLD);
-        MPI_Recv(&y, 1, MPI_DOUBLE, my_rank-1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        (*in)[0] = y;
-        /*
-        get last element of previous rank
-        send element to last index of the previous rank, if not last rank
-        */
-        }
 
-    // (#blocks-1)*iterations*2 OVERLAP 
-    for (size_t block = 0; block < n / SPACEBLOCK; block++) {
-        if (block == 0) {
+    int blocks;
+    if (my_rank == 0 || my_rank == p-1) {
+        blocks = (size - TIMEBLOCK) / SPACEBLOCK;
+    } else {
+        blocks = (size - 2 * TIMEBLOCK) / SPACEBLOCK;
+    }
+
+    for (size_t block = 0; block < blocks; block++) {
+        if (my_rank == 0 && block == 0) {
             memcpy(inBuffer, *in, (SPACEBLOCK + iterations) * sizeof(REAL));
             Left(&inBuffer, &outBuffer, SPACEBLOCK, iterations);
             memcpy(*out, outBuffer, SPACEBLOCK * sizeof(REAL));
-        } else if (block == n / SPACEBLOCK - 1) {
+        } else if (my_rank == p-1 && block == blocks - 1) {
             memcpy(inBuffer, *in + block * SPACEBLOCK - iterations,
                    (SPACEBLOCK + iterations) * sizeof(REAL));
             Right(&inBuffer, &outBuffer, SPACEBLOCK, iterations);
@@ -148,7 +120,7 @@ void StencilBlocked(REAL **in, REAL **out, size_t n, int iterations, int my_rank
             Middle(&inBuffer, &outBuffer, SPACEBLOCK, iterations);
             memcpy(*out + block * SPACEBLOCK, outBuffer + iterations, SPACEBLOCK * sizeof(REAL));
         }
-        }
+    }
     free(inBuffer);
     free(outBuffer);
 }
