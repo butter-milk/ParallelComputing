@@ -153,72 +153,44 @@ void StencilBlocked(REAL **in, REAL **out, size_t n, int iterations, int my_rank
     free(outBuffer);
 }
 
-void Stencil(REAL **in, REAL **out, size_t n, int iterations, int my_rank, int p)
+void SendRecvNeighborValues(REAL **in, size_t size, int my_rank, int p)
 {
-    REAL *x = calloc(TIMEBLOCK, sizeof(REAL));
-    REAL *y = calloc(TIMEBLOCK, sizeof(REAL));
-    REAL *ay = calloc(TIMEBLOCK, sizeof(REAL));
-    REAL *ax = calloc(TIMEBLOCK, sizeof(REAL));
-    for(int i = 0; i < TIMEBLOCK; i+=1){
-        // TIMEBLOCK  TIMEBLOCK n/p-2TIMEBLOCK TIMEBLOCK TIMEBLOCK
-        //      ax       ay                       x        y
-        x[i] = (my_rank+1)*(n-2*TIMEBLOCK)+i 
-        y[i] = (my_rank+1)*(n-TIMEBLOCK)+i
-        ax[i] = my_rank*(n-2*TIMEBLOCK)+i 
-        ay[i] = my_rank*(n-TIMEBLOCK)+i 
-
+    if (my_rank != 0) {
+        // send in[TIMEBLOCK: 2 * TIMEBLOCK] to previous thread
+        MPI_Send((*in) + TIMEBLOCK * sizeof(REAL), TIMEBLOCK, MPI_DOUBLE, my_rank - 1, 0, MPI_COMM_WORLD);
     }
-    
-    
-    if(my_rank == 0){
-        //FIRST SEND, THEN RECEIVE
-
-        
-        // we only need to send/receive when multiple threads are used.
-        if(my_rank != p-1){
-            MPI_Send(&x, TIMEBLOCK, MPI_DOUBLE, my_rank+1,0, MPI_COMM_WORLD);
-            MPI_Recv(&y, TIMEBLOCK, MPI_DOUBLE, my_rank+1,0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            for(int i = 0; i < TIMEBLOCK; i++){
-                (*in)[n-TIMEBLOCK+i] = ax[i];
-            }
-        }
-    }else{
-        //FIRST RECEIVE, THEN SEND only sending if my_rank!= p-1
-        if(my_rank % 2 == 1){
-            // ODD threadno
-            MPI_Recv(&x, TIMEBLOCK, MPI_DOUBLE, my_rank-1,0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            for(int i = 0; i < TIMEBLOCK; i++){
-                (*in)[(my_rank+1)*(n-2*TIMEBLOCK)+i] = x[i]; 
-            }
-            MPI_Send(&y, TIMEBLOCK, MPI_DOUBLE, my_rank-1,0, MPI_COMM_WORLD);
-            if(my_rank != p-1){
-                MPI_Send(&ax, TIMEBLOCK, MPI_DOUBLE, my_rank+1,0, MPI_COMM_WORLD);
-                MPI_Recv(&ay, TIMEBLOCK, MPI_DOUBLE, my_rank+1,0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-                for(int i = 0; i < TIMEBLOCK; i++){
-                    (*in)[n-TIMEBLOCK+i] = ay[i];
-                }
-            }
-        } else { 
-            // EVEN threadno
-            MPI_Recv(&ay, TIMEBLOCK, MPI_DOUBLE, my_rank-1,0, MPI_COMM_WORLD, MPI_STATUS_IGNORE); 
-
-        }
-        
+    if (my_rank != p - 1) {
+        // send in[size - 2*TIMEBLOCK : size - TIMEBLOCK] to next thread
+        MPI_Send((*in) + (size - 2 * TIMEBLOCK) * sizeof(REAL), TIMEBLOCK, MPI_DOUBLE, my_rank + 1, 0, MPI_COMM_WORLD);
     }
-    
+
+    if (my_rank != 0) {
+        // Recive in[0 : TIMEBLOCK] from previous thread
+        MPI_Recv((*in), TIMEBLOCK, MPI_DOUBLE, my_rank - 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    }
+    if (my_rank != p - 1) {
+        // Recive in[size - TIMEBLOCK : size] from next thread
+        MPI_Recv((*in) + (size - TIMEBLOCK) * sizeof(REAL), TIMEBLOCK, MPI_DOUBLE, my_rank + 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    }
+}
+
+void Stencil(REAL **in, REAL **out, size_t size, int iterations, int my_rank, int p)
+{
     int rest_iters = iterations % TIMEBLOCK;
     if (rest_iters != 0) {
-        StencilBlocked(in, out, n, rest_iters, my_rank,p);
+        StencilBlocked(in, out, size, rest_iters, my_rank, p);
         REAL *temp = *out;
         *out = *in;
         *in = temp;
+        SendRecvNeighborValues(in, size, my_rank, p);
     }
 
     for (int t = rest_iters; t < iterations; t += TIMEBLOCK) {
-        StencilBlocked(in, out, n, TIMEBLOCK, my_rank, p);
+        StencilBlocked(in, out, size, TIMEBLOCK, my_rank, p);
         REAL *temp = *out;
         *out = *in;
         *in = temp;
+        SendRecvNeighborValues(in, size, my_rank, p);
     }
 
     REAL *temp = *out;
@@ -297,9 +269,9 @@ int main(int argc, char **argv)
     REAL *in, *out;
     if (my_rank == 0 || my_rank == p - 1){
         // If were dealing with either of the ends of the array, we only need to deal overlap on one side
-        size = n/p + TIMEBLOCK
-        REAL *in = calloc(n/p + TIMEBLOCK, sizeof(REAL));
-        REAL *out = malloc((n/p +TIMEBLOCK) * sizeof(REAL));
+        size = n/p + TIMEBLOCK; 
+        REAL *in = calloc(size,  sizeof(REAL));
+        REAL *out = malloc(size * sizeof(REAL));
         if (my_rank == 0) {
             in[0] = 100;
         }
@@ -317,7 +289,7 @@ int main(int argc, char **argv)
         }
     } else {
         // In a middle block, we have overlap on two sides, so we allocate 2 * timeblock as buffer
-        size = n/p + 2*TIMEBLOCK
+        size = n/p + 2*TIMEBLOCK ;
         REAL *in = calloc(n/p + 2*TIMEBLOCK, sizeof(REAL));
         REAL *out = malloc((n/p +2*TIMEBLOCK) * sizeof(REAL));
 
