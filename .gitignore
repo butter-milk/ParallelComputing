@@ -1,2 +1,6 @@
 .vscode/*.json
 results/
+.python-version
+poetry.lock
+pyproject.toml
+*.tar.gz
