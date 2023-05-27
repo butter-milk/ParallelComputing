@@ -269,8 +269,13 @@ int main(int argc, char **argv)
         size = n/p + 2 * TIMEBLOCK ;
         in = calloc(size, sizeof(REAL));
         out = malloc(size * sizeof(REAL));
-
-        int start = (my_rank * (n / p) + max(n % p, my_rank)) * SPACEBLOCK - TIMEBLOCK;
+        
+        int start;
+        if (my_rank < n % p) {
+            start = (my_rank * (n / p) + my_rank) * SPACEBLOCK - TIMEBLOCK;
+        } else {
+            start = (my_rank * (n / p) + n % p) * SPACEBLOCK - TIMEBLOCK;
+        }
         if (n/2 >= start && n/2 < start + size) {
             in[n/2 - start] = n;
         }
