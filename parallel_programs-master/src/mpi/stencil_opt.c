@@ -94,14 +94,17 @@ void Right(REAL **in, REAL **out, size_t n, int iterations)
 
 void StencilBlocked(REAL **in, REAL **out, size_t size, int iterations, int my_rank, int p)
 {
-    REAL *inBuffer = malloc((SPACEBLOCK + 2 * iterations) * sizeof(REAL));
-    REAL *outBuffer = malloc((SPACEBLOCK + 2 * iterations) * sizeof(REAL));
-
     int blocks;
+    REAL *inBuffer;
+    REAL *outBuffer;
     if (my_rank == 0 || my_rank == p-1) {
         blocks = (size - TIMEBLOCK) / SPACEBLOCK;
+        inBuffer = malloc((SPACEBLOCK + iterations) * sizeof(REAL));
+        outBuffer = malloc((SPACEBLOCK + iterations) * sizeof(REAL));
     } else {
         blocks = (size - 2 * TIMEBLOCK) / SPACEBLOCK;
+        inBuffer = malloc((SPACEBLOCK + 2 * iterations) * sizeof(REAL));
+        outBuffer = malloc((SPACEBLOCK + 2 * iterations) * sizeof(REAL));
     }
 
     for (size_t block = 0; block < blocks; block++) {
@@ -109,7 +112,7 @@ void StencilBlocked(REAL **in, REAL **out, size_t size, int iterations, int my_r
             memcpy(inBuffer, *in, (SPACEBLOCK + iterations) * sizeof(REAL));
             Left(&inBuffer, &outBuffer, SPACEBLOCK, iterations);
             memcpy(*out, outBuffer, SPACEBLOCK * sizeof(REAL));
-        } else if (my_rank == p-1 && block == blocks - 1) {
+        } else if (my_rank == p - 1 && block == blocks - 1) {
             memcpy(inBuffer, *in + block * SPACEBLOCK - iterations,
                    (SPACEBLOCK + iterations) * sizeof(REAL));
             Right(&inBuffer, &outBuffer, SPACEBLOCK, iterations);
@@ -240,8 +243,9 @@ void init_input(REAL **in, REAL **out, int *size, size_t n, int my_rank, int p) 
         *size = n/p + 2*TIMEBLOCK;
         *in = calloc(*size,  sizeof(REAL));
         *out = malloc(*size * sizeof(REAL));
-        if (n/2 >= (n/p) * SPACEBLOCK && n/2 < (n/p) * SPACEBLOCK + *size) {
-            (*in)[n/2 - (n - *size)] = n;
+        int start = my_rank * n/p - TIMEBLOCK;
+        if (n/2 >= start && n/2 < start + *size) {
+            (*in)[n/2 - start] = n;
         }
     }
 }
