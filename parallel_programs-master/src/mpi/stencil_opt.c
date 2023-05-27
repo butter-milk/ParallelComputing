@@ -99,9 +99,9 @@ void StencilBlocked(REAL **in, REAL **out, size_t size, int iterations, int my_r
 
     int blocks;
     if (my_rank == 0 || my_rank == p-1) {
-        blocks = (size - TIMEBLOCK) / SPACEBLOCK;
+        blocks = (size - iterations) / SPACEBLOCK;
     } else {
-        blocks = (size - 2 * TIMEBLOCK) / SPACEBLOCK;
+        blocks = (size - 2 * iterations) / SPACEBLOCK;
     }
 
     for (size_t block = 0; block < blocks; block++) {
