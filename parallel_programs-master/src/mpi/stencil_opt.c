@@ -125,24 +125,24 @@ void StencilBlocked(REAL **in, REAL **out, size_t size, int iterations, int my_r
     free(outBuffer);
 }
 
-void SendRecvNeighborValues(REAL **in, size_t size, int my_rank, int p)
+void SendRecvNeighborValues(REAL **in, size_t size, int my_rank, int p, int variableSize)
 {
     if (my_rank != 0) {
-        // send in[TIMEBLOCK: 2 * TIMEBLOCK] to previous thread
-        MPI_Send((*in) + TIMEBLOCK * sizeof(REAL), TIMEBLOCK, MPI_DOUBLE, my_rank - 1, 0, MPI_COMM_WORLD);
+        // send in[variableSize: 2 * variableSize] to previous thread
+        MPI_Send((*in) + variableSize * sizeof(REAL), variableSize, MPI_DOUBLE, my_rank - 1, 0, MPI_COMM_WORLD);
     }
     if (my_rank != p - 1) {
-        // send in[size - 2*TIMEBLOCK : size - TIMEBLOCK] to next thread
-        MPI_Send((*in) + (size - 2 * TIMEBLOCK) * sizeof(REAL), TIMEBLOCK, MPI_DOUBLE, my_rank + 1, 0, MPI_COMM_WORLD);
+        // send in[size - 2*variableSize: size - variableSize] to next thread
+        MPI_Send((*in) + (size - 2 * variableSize) * sizeof(REAL), variableSize, MPI_DOUBLE, my_rank + 1, 0, MPI_COMM_WORLD);
     }
 
     if (my_rank != 0) {
-        // Recive in[0 : TIMEBLOCK] from previous thread
-        MPI_Recv((*in), TIMEBLOCK, MPI_DOUBLE, my_rank - 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        // Recive in[0 : variableSize] from previous thread
+        MPI_Recv((*in), variableSize, MPI_DOUBLE, my_rank - 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     }
     if (my_rank != p - 1) {
-        // Recive in[size - TIMEBLOCK : size] from next thread
-        MPI_Recv((*in) + (size - TIMEBLOCK) * sizeof(REAL), TIMEBLOCK, MPI_DOUBLE, my_rank + 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        // Recive in[size - variableSize : size] from next thread
+        MPI_Recv((*in) + (size - variableSize) * sizeof(REAL), variableSize, MPI_DOUBLE, my_rank + 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     }
 }
 
@@ -154,7 +154,7 @@ void Stencil(REAL **in, REAL **out, size_t size, int iterations, int my_rank, in
         REAL *temp = *out;
         *out = *in;
         *in = temp;
-        SendRecvNeighborValues(in, size, my_rank, p);
+        SendRecvNeighborValues(in, size, my_rank, p, rest_iters);
     }
 
     for (int t = rest_iters; t < iterations; t += TIMEBLOCK) {
@@ -162,7 +162,7 @@ void Stencil(REAL **in, REAL **out, size_t size, int iterations, int my_rank, in
         REAL *temp = *out;
         *out = *in;
         *in = temp;
-        SendRecvNeighborValues(in, size, my_rank, p);
+        SendRecvNeighborValues(in, size, my_rank, p, TIMEBLOCK);
     }
 
     REAL *temp = *out;
