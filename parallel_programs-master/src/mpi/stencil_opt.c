@@ -236,8 +236,8 @@ int main(int argc, char **argv)
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &p);
 
-    if (n % p != 0) {
-        printf("I am lazy, so assumed that rank count divides n.");
+    if ((n / SPACEBLOCK) % p != 0) {
+        printf("I am lazy, so assumed that rank count divides the number of blocks.");
         return EXIT_FAILURE;
     }
 
