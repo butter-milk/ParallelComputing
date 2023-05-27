@@ -14,5 +14,5 @@
 make bin/stencil_opt_mpi
 for EXPRM in 1 2 3 4 5;
 do
-    mpirun bin/stencil_opt_mpi LEN ITER >> results/measurements/mpi_stencil_LEN_ITER_NTASKS.txt
+    mpirun bin/stencil_opt_mpi LEN ITER >> measurements/mpi_stencil_LEN_ITER_NTASKS.txt
 done
