@@ -7,10 +7,10 @@
 #SBATCH --threads-per-core=1
 #SBATCH --partition=csmpi_short
 #SBATCH --time=00:05:00
-#SBATCH --output=stencil_mpi_NTASKS.out
+#SBATCH --output=reports/%j.out
 #SBATCH --job-name "n=LEN;i=ITER"
 
 # Compile on the machine, not the head node
 make bin/stencil_opt_mpi
 
-mpirun bin/stencil_opt_mpi LEN ITER >> results/mpi_stencil_NTASKS_LEN_ITER.txt
+mpirun bin/stencil_opt_mpi LEN ITER >> results/mpi_stencil_LEN_ITER_NTASKS.txt
