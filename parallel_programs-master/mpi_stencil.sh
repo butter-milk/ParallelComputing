@@ -14,5 +14,4 @@ sbatch mpi_stencil_"$NTASKS".sh
 
 rm mpi_stencil_"$NTASKS".sh    
 
-    NODES=$(( 2 * NODES ))
-done
+
