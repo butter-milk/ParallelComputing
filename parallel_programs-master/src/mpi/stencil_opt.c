@@ -98,15 +98,16 @@ void StencilBlocked(REAL **in, REAL **out, size_t size, int iterations, int my_r
     REAL *outBuffer = malloc((SPACEBLOCK + 2 * iterations) * sizeof(REAL));
 
     int blocks;
-    int start_offset;
-    if (my_rank == 0) {
+    if (my_rank == 0 || my_rank == p-1) {
         blocks = (size - TIMEBLOCK) / SPACEBLOCK;
-        start_offset = 0;
-    } else if (my_rank == p-1) {
-        blocks = (size - TIMEBLOCK) / SPACEBLOCK;
-        start_offset = iterations;
     } else {
         blocks = (size - 2 * TIMEBLOCK) / SPACEBLOCK;
+    }
+
+    int start_offset;
+    if (my_rank == 0) {
+        start_offset = 0;
+    } else {
         start_offset = iterations;
     }
 
