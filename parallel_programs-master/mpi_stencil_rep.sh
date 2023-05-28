@@ -5,6 +5,14 @@ if [ $# -lt 2 ]
         echo "Supply 'n' and 'iterations' please"
         exit 1
 fi
+if [ ! -d "measurements" ]; then
+    mkdir measurements
+    echo "created directory 'measurements'"
+fi
+if [ ! -d "reports" ]; then
+    mkdir reports
+    echo "created directory 'reports'"
+fi
 
 NODES=1
 
