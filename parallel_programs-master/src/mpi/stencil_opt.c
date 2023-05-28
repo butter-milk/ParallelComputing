@@ -129,11 +129,11 @@ void SendRecvNeighborValues(REAL **in, size_t size, int my_rank, int p, int iter
 {
     if (my_rank != 0) {
         // send in[iterations: 2 * iterations] to previous thread
-        MPI_Send((*in) + iterations * sizeof(REAL), iterations, MPI_DOUBLE, my_rank - 1, 0, MPI_COMM_WORLD);
+        MPI_Send((*in) + iterations, iterations, MPI_DOUBLE, my_rank - 1, 0, MPI_COMM_WORLD);
     }
     if (my_rank != p - 1) {
         // send in[size - 2*iterations: size - iterations] to next thread
-        MPI_Send((*in) + (size - 2 * iterations) * sizeof(REAL), iterations, MPI_DOUBLE, my_rank + 1, 0, MPI_COMM_WORLD);
+        MPI_Send((*in) + size - 2 * iterations, iterations, MPI_DOUBLE, my_rank + 1, 0, MPI_COMM_WORLD);
     }
 
     if (my_rank != 0) {
@@ -142,7 +142,7 @@ void SendRecvNeighborValues(REAL **in, size_t size, int my_rank, int p, int iter
     }
     if (my_rank != p - 1) {
         // Recive in[size - iterations : size] from next thread
-        MPI_Recv((*in) + (size - iterations) * sizeof(REAL), iterations, MPI_DOUBLE, my_rank + 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        MPI_Recv((*in) + size - iterations, iterations, MPI_DOUBLE, my_rank + 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     }
 }
 void Stencil(REAL **in, REAL **out, size_t size, int iterations, int my_rank, int p)
