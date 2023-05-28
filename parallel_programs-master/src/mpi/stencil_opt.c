@@ -163,12 +163,10 @@ void Stencil(REAL **in, REAL **out, size_t size, int iterations, int my_rank, in
     }
 
     for (int t = rest_iters; t < iterations; t += TIMEBLOCK) {
-        printf("[%d] starting iterations %d\n", my_rank, t);
         StencilBlocked(in, out, size, TIMEBLOCK, my_rank, p);
         REAL *temp = *out;
         *out = *in;
         *in = temp;
-        printf("[%d] sending result of %d\n", my_rank, t);
         SendRecvNeighborValues(in, size, my_rank, p);
     }
 
