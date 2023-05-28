@@ -117,13 +117,13 @@ void StencilBlocked(REAL **in, REAL **out, size_t size, int iterations, int my_r
             Left(&inBuffer, &outBuffer, SPACEBLOCK, iterations);
             memcpy(*out, outBuffer, SPACEBLOCK * sizeof(REAL));
         } else if (my_rank == p - 1 && block == blocks - 1) {
-            memcpy(inBuffer, *in + block * SPACEBLOCK - start_offset, (SPACEBLOCK + iterations) * sizeof(REAL));
+            memcpy(inBuffer, *in + block * SPACEBLOCK, (SPACEBLOCK + iterations) * sizeof(REAL));
             Right(&inBuffer, &outBuffer, SPACEBLOCK, iterations);
             memcpy(*out + block * SPACEBLOCK + iterations, outBuffer + iterations, SPACEBLOCK * sizeof(REAL));
         } else {
-            memcpy(inBuffer, *in + block * SPACEBLOCK - start_offset, (SPACEBLOCK + iterations + start_offset) * sizeof(REAL));
+            memcpy(inBuffer, *in + block * SPACEBLOCK - iterations + start_offset, (SPACEBLOCK + 2 * iterations) * sizeof(REAL));
             Middle(&inBuffer, &outBuffer, SPACEBLOCK, iterations);
-            memcpy(*out + block * SPACEBLOCK + iterations, outBuffer + iterations, SPACEBLOCK * sizeof(REAL));
+            memcpy(*out + block * SPACEBLOCK + start_offset, outBuffer + iterations, SPACEBLOCK * sizeof(REAL));
         }
     }
     free(inBuffer);
