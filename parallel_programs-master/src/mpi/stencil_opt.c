@@ -98,10 +98,16 @@ void StencilBlocked(REAL **in, REAL **out, size_t size, int iterations, int my_r
     REAL *outBuffer = malloc((SPACEBLOCK + 2 * iterations) * sizeof(REAL));
 
     int blocks;
-    if (my_rank == 0 || my_rank == p-1) {
+    int start_offset;
+    if (my_rank == 0) {
         blocks = (size - TIMEBLOCK) / SPACEBLOCK;
+        start_offset = 0;
+    } else if (my_rank == p-1) {
+        blocks = (size - TIMEBLOCK) / SPACEBLOCK;
+        start_offset = iterations;
     } else {
         blocks = (size - 2 * TIMEBLOCK) / SPACEBLOCK;
+        start_offset = iterations;
     }
 
     for (size_t block = 0; block < blocks; block++) {
@@ -110,11 +116,11 @@ void StencilBlocked(REAL **in, REAL **out, size_t size, int iterations, int my_r
             Left(&inBuffer, &outBuffer, SPACEBLOCK, iterations);
             memcpy(*out, outBuffer, SPACEBLOCK * sizeof(REAL));
         } else if (my_rank == p - 1 && block == blocks - 1) {
-            memcpy(inBuffer, *in + block * SPACEBLOCK, (SPACEBLOCK + iterations) * sizeof(REAL));
+            memcpy(inBuffer, *in + block * SPACEBLOCK - start_offset, (SPACEBLOCK + iterations) * sizeof(REAL));
             Right(&inBuffer, &outBuffer, SPACEBLOCK, iterations);
             memcpy(*out + block * SPACEBLOCK + iterations, outBuffer + iterations, SPACEBLOCK * sizeof(REAL));
         } else {
-            memcpy(inBuffer, *in + block * SPACEBLOCK, (SPACEBLOCK + 2 * iterations) * sizeof(REAL));
+            memcpy(inBuffer, *in + block * SPACEBLOCK - start_offset, (SPACEBLOCK + iterations + start_offset) * sizeof(REAL));
             Middle(&inBuffer, &outBuffer, SPACEBLOCK, iterations);
             memcpy(*out + block * SPACEBLOCK + iterations, outBuffer + iterations, SPACEBLOCK * sizeof(REAL));
         }
@@ -156,10 +162,12 @@ void Stencil(REAL **in, REAL **out, size_t size, int iterations, int my_rank, in
     }
 
     for (int t = rest_iters; t < iterations; t += TIMEBLOCK) {
+        printf("[%d] starting iterations %d\n", my_rank, t);
         StencilBlocked(in, out, size, TIMEBLOCK, my_rank, p);
         REAL *temp = *out;
         *out = *in;
         *in = temp;
+        printf("[%d] sending result of %d\n", my_rank, t);
         SendRecvNeighborValues(in, size, my_rank, p);
     }
 
