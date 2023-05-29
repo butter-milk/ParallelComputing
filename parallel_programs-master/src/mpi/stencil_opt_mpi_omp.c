@@ -89,85 +89,83 @@ void Right(REAL **in, REAL **out, size_t n, int iterations)
     }
 }
 
-void StencilBlocked(REAL **in, REAL **out, size_t n, int iterations, int my_rank, int p)
+void StencilBlocked(REAL **in, REAL **out, size_t size, int iterations, int my_rank, int p)
 {
     REAL *inBuffer = malloc((SPACEBLOCK + 2 * iterations) * sizeof(REAL));
-
     REAL *outBuffer = malloc((SPACEBLOCK + 2 * iterations) * sizeof(REAL));
-    if (my_rank == 0 && p!=1){
-        double x, y;
-        y= (*in)[n-2];
-        MPI_Recv(&x, 1, MPI_DOUBLE, my_rank+1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        (*in)[n-1] = x;
-        MPI_Send(&y, 1, MPI_DOUBLE, my_rank+1, 0, MPI_COMM_WORLD);
-        /*
-        get first element of next rank
-        send element to first index of the next rank, if not last rank
-        */
-    }
-    if (my_rank < p-1 && my_rank != 0) {
-        double x, y;
-        y= (*in)[n-2];
-        MPI_Recv(&x, 1, MPI_DOUBLE, my_rank+1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        (*in)[n-1] = x;
-        MPI_Send(&y, 1, MPI_DOUBLE, my_rank+1, 0, MPI_COMM_WORLD);
-        /*
-        get first element of next rank
-        send element to first index of the next rank, if not last rank
-        */
-    }
-    if (my_rank > 0) {
-        double x, y;
-        x = (*in)[1];  
-        MPI_Send(&x, 1, MPI_DOUBLE, my_rank-1, 0, MPI_COMM_WORLD);
-        MPI_Recv(&y, 1, MPI_DOUBLE, my_rank-1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        (*in)[0] = y;
-        /*
-        get last element of previous rank
-        send element to last index of the previous rank, if not last rank
-        */
-        }
 
-    // (#blocks-1)*iterations*2 OVERLAP
-    /* omp parallelism starts here */ 
-    #pragma omp for schedule(static) private(inBuffer, outBuffer)
-    for (size_t block = 0; block < n / SPACEBLOCK; block++) {
-        if (block == 0) {
+    int blocks;
+    if (my_rank == 0 || my_rank == p-1) {
+        blocks = (size - TIMEBLOCK) / SPACEBLOCK;
+    } else {
+        blocks = (size - 2 * TIMEBLOCK) / SPACEBLOCK;
+    }
+
+    int start_offset;
+    if (my_rank == 0) {
+        start_offset = 0;
+    } else {
+        start_offset = iterations;
+    }
+
+    
+    for (size_t block = 0; block < blocks; block++) {
+        if (my_rank == 0 && block == 0) {
             memcpy(inBuffer, *in, (SPACEBLOCK + iterations) * sizeof(REAL));
-            //Left(&inBuffer, &outBuffer, SPACEBLOCK, iterations);
+            Left(&inBuffer, &outBuffer, SPACEBLOCK, iterations);
             memcpy(*out, outBuffer, SPACEBLOCK * sizeof(REAL));
-        } else if (block == n / SPACEBLOCK - 1) {
-            memcpy(inBuffer, *in + block * SPACEBLOCK - iterations,
-                   (SPACEBLOCK + iterations) * sizeof(REAL));
-            //Right(&inBuffer, &outBuffer, SPACEBLOCK, iterations);
-            memcpy(*out + block * SPACEBLOCK, outBuffer + iterations, SPACEBLOCK * sizeof(REAL));
+        } else if (my_rank == p - 1 && block == blocks - 1) {
+            memcpy(inBuffer, *in + block * SPACEBLOCK, (SPACEBLOCK + iterations) * sizeof(REAL));
+            Right(&inBuffer, &outBuffer, SPACEBLOCK, iterations);
+            memcpy(*out + block * SPACEBLOCK + iterations, outBuffer + iterations, SPACEBLOCK * sizeof(REAL));
         } else {
-            memcpy(inBuffer, *in + block * SPACEBLOCK - iterations,
-                    (SPACEBLOCK + 2 * iterations) * sizeof(REAL));
+            memcpy(inBuffer, *in + block * SPACEBLOCK - iterations + start_offset, (SPACEBLOCK + 2 * iterations) * sizeof(REAL));
             Middle(&inBuffer, &outBuffer, SPACEBLOCK, iterations);
-            memcpy(*out + block * SPACEBLOCK, outBuffer + iterations, SPACEBLOCK * sizeof(REAL));
+            memcpy(*out + block * SPACEBLOCK + start_offset, outBuffer + iterations, SPACEBLOCK * sizeof(REAL));
         }
-        }
+    }
     free(inBuffer);
     free(outBuffer);
-    /* omp parallelism ends here*/
 }
 
-void Stencil(REAL **in, REAL **out, size_t n, int iterations, int my_rank, int p)
+void SendRecvNeighborValues(REAL **in, size_t size, int my_rank, int p)
+{
+    if (my_rank != 0) {
+        // send in[TIMEBLOCK: 2 * TIMEBLOCK] to previous thread
+        MPI_Send((*in) + TIMEBLOCK  , TIMEBLOCK, MPI_DOUBLE, my_rank - 1, 0, MPI_COMM_WORLD);
+    }
+    if (my_rank != p - 1) {
+        // send in[size - 2*TIMEBLOCK : size - TIMEBLOCK] to next thread
+        MPI_Send((*in) + (size - 2 * TIMEBLOCK) , TIMEBLOCK, MPI_DOUBLE, my_rank + 1, 0, MPI_COMM_WORLD);
+    }
+
+    if (my_rank != 0) {
+        // Recive in[0 : TIMEBLOCK] from previous thread
+        MPI_Recv((*in), TIMEBLOCK, MPI_DOUBLE, my_rank - 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    }
+    if (my_rank != p - 1) {
+        // Recive in[size - TIMEBLOCK : size] from next thread
+        MPI_Recv((*in) + (size - TIMEBLOCK) , TIMEBLOCK, MPI_DOUBLE, my_rank + 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    }
+}
+
+void Stencil(REAL **in, REAL **out, size_t size, int iterations, int my_rank, int p)
 {
     int rest_iters = iterations % TIMEBLOCK;
     if (rest_iters != 0) {
-        StencilBlocked(in, out, n, rest_iters, my_rank,p);
+        StencilBlocked(in, out, size, rest_iters, my_rank, p);
         REAL *temp = *out;
         *out = *in;
         *in = temp;
+        SendRecvNeighborValues(in, size, my_rank, p);
     }
 
     for (int t = rest_iters; t < iterations; t += TIMEBLOCK) {
-        StencilBlocked(in, out, n, TIMEBLOCK, my_rank, p);
+        StencilBlocked(in, out, size, TIMEBLOCK, my_rank, p);
         REAL *temp = *out;
         *out = *in;
         *in = temp;
+        SendRecvNeighborValues(in, size, my_rank, p);
     }
 
     REAL *temp = *out;
@@ -215,6 +213,43 @@ bool equal(REAL *x, REAL *y, size_t n, REAL error)
 #endif
 //START CARING
 
+void init_input(REAL **in, REAL **out, int *size, size_t n, int my_rank, int p) {
+    if (p == 1) {
+        *size = n;
+        *in = calloc(*size,  sizeof(REAL));
+        *out = malloc(*size * sizeof(REAL));
+        (*in)[0] = 100;
+        (*in)[n/2] = n;
+        (*in)[n - 1] = 1000;
+    } else if (my_rank == 0) {
+        *size = n/p + TIMEBLOCK;
+        *in = calloc(*size,  sizeof(REAL));
+        *out = malloc(*size * sizeof(REAL));
+
+        (*in)[0] = 100;
+        if (n/2 < *size) {
+            (*in)[n/2] = n;
+        }
+    } else if (my_rank == p - 1) {
+        *size = n/p + TIMEBLOCK;
+        *in = calloc(*size,  sizeof(REAL));
+        *out = malloc(*size * sizeof(REAL));
+
+        (*in)[*size - 1] = 1000;
+        if (n/2 >= n - *size) {
+            (*in)[n/2 - (n - *size)] = n;
+        }
+    } else {
+        *size = n/p + 2*TIMEBLOCK;
+        *in = calloc(*size,  sizeof(REAL));
+        *out = malloc(*size * sizeof(REAL));
+        int start = my_rank * n/p - TIMEBLOCK;
+        if (n/2 >= start && n/2 < start + *size) {
+            (*in)[n/2 - start] = n;
+        }
+    }
+}
+
 int main(int argc, char **argv)
 {
     if (argc != 3) {
@@ -233,24 +268,27 @@ int main(int argc, char **argv)
 
     
     MPI_Init(&argc, &argv);
-    /*
-    assuming that p divides n, so if we use 1,2,4,8,16,32 threads, n should always divide 32!
-    furthermore, n should divide SPACEBLOCK as well, meaning that n should be a multiple of lcm(32,1000) = 4000
-    */
+
     int my_rank, p;
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &p);
 
-    REAL *in = calloc(n/p + 2, sizeof(REAL));
-    REAL *out = malloc((n/p +2) * sizeof(REAL));
+    if ((n / SPACEBLOCK) % p != 0) {
+        printf("I am lazy, so assumed that rank count divides the number of blocks.\n");
+        return EXIT_FAILURE;
+    }
 
+    int size;
+    REAL *in, *out;
+    init_input(&in, &out, &size, n, my_rank, p);
     
-    if (my_rank==0) {in[0] = 100;}
-    if (my_rank*n/p <= n/2 && (my_rank+1)*n/p >= n/2){in[n/2-my_rank*n/p] = n;}//THIS IS CORRECT SINCE N IS ASSUMED TO BE DIVIDED BY 32
-    if (my_rank == p-1) {in[n-1]=1000;}
     double duration;
-    TIME(duration, Stencil(&in, &out, n/p, iterations, my_rank, p););
+    TIME(duration, Stencil(&in, &out, size, iterations, my_rank, p););
     if(my_rank==0){printf("%lf %lf\n", duration, iterations * (n-2) * 5 / 1000000000 /duration);}
+    
+    free(in);
+    free(out);
+
     MPI_Finalize();
     
 #ifdef CHECK
@@ -268,9 +306,6 @@ int main(int argc, char **argv)
     free(in2);
     free(out2);
 #endif
-
-    free(in);
-    free(out);
 
     return EXIT_SUCCESS;
 }
