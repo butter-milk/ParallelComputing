@@ -23,7 +23,7 @@ do
 
     NTASKS=$(( TASKS_PER_NODE * NODES ))
     
-    sed "s/NODES/$NODES/g" mpi_stencil_rep.sh.template > mpi_omp_stencil_"$NTASKS".sh
+    sed "s/NODES/$NODES/g" mpi_stencil_omp.sh.template > mpi_omp_stencil_"$NTASKS".sh
     sed -i "s/NTASKS/$NTASKS/g" mpi_omp_stencil_"$NTASKS".sh
     sed -i "s/OMPTHREADS/$OMPTHREADS/g" mpi_omp_stencil_"$NTASKS".sh
     sed -i "s/TASKS_PER_NODE/$TASKS_PER_NODE/g" mpi_omp_stencil_"$NTASKS".sh
