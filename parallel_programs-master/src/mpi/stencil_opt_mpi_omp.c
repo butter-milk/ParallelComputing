@@ -108,7 +108,7 @@ void StencilBlocked(REAL **in, REAL **out, size_t size, int iterations, int my_r
         start_offset = iterations;
     }
 
-    
+    #pragma omp for schedule(static) private(inBuffer, outBuffer)
     for (size_t block = 0; block < blocks; block++) {
         if (my_rank == 0 && block == 0) {
             memcpy(inBuffer, *in, (SPACEBLOCK + iterations) * sizeof(REAL));
