@@ -5,9 +5,9 @@ if [ $# -lt 2 ]
         echo "Supply 'n' and 'iterations' please"
         exit 1
 fi
-if [ ! -d "results" ]; then
+if [ ! -d "measurements" ]; then
     mkdir results
-    echo "created directory 'results'"
+    echo "created directory 'measurements'"
 fi
 if [ ! -d "reports" ]; then
     mkdir reports
@@ -23,7 +23,7 @@ do
 
     NTASKS=$(( TASKS_PER_NODE * NODES ))
 
-    sed "s/NODES/$NODES/g" mpi_stencil_omp.sh.template > mpi_omp_stencil_"$NTASKS".sh
+    sed "s/NODES/$NODES/g" mpi_stencil_omp_rep.sh.template > mpi_omp_stencil_"$NTASKS".sh
     sed -i "s/NTASKS/$NTASKS/g" mpi_omp_stencil_"$NTASKS".sh
     sed -i "s/OMPTHREADS/$OMPTHREADS/g" mpi_omp_stencil_"$NTASKS".sh
     sed -i "s/TASKS_PER_NODE/$TASKS_PER_NODE/g" mpi_omp_stencil_"$NTASKS".sh

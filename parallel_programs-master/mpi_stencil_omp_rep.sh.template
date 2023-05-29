@@ -1,0 +1,19 @@
+#!/bin/sh
+
+#SBATCH --account=csmpistud
+#SBATCH --ntasks=NTASKS
+#SBATCH --cpus-per-task=OMPTHREADS
+#SBATCH --nodes=NODES
+#SBATCH --ntasks-per-node=TASKS_PER_NODE
+#SBATCH --threads-per-core=1
+#SBATCH --partition=csmpi_short
+#SBATCH --time=00:05:00
+#SBATCH --output=reports/%j.out
+#SBATCH --job-name "n=LEN;i=ITER"
+#SBATCH --export=ALL,OMP_NUM_THREADS=OMPTHREADS
+
+make bin/stencil_opt_omp_mpi
+for EXPRM in 1 2 3 4 5;
+do
+    mpirun bin/stencil_opt_omp_mpi LEN ITER >> measurements/mpi_stencil_OMPTHREADS_LEN_ITER_NTASKS.txt
+done
