@@ -2,6 +2,7 @@
 
 #SBATCH --account=csmpistud
 #SBATCH --ntasks=NTASKS
+#SBATCH --cpus-per-task=OMPTHREADS
 #SBATCH --nodes=NODES
 #SBATCH --ntasks-per-node=TASKS_PER_NODE
 #SBATCH --threads-per-core=1
