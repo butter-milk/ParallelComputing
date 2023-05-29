@@ -12,4 +12,4 @@
 
 make bin/stencil_opt_mpi_omp
 setenv OMP_NUM_THREADS OMPTHREADS
-mpirun bin/stencil_opt_mpi_omp LEN ITER >> measurements/mpi_stencil_LEN_ITER_NTASKS_OMPTHREADS.txt
+mpirun bin/stencil_opt_mpi_omp LEN ITER >> results/mpi_stencil_OMPTHREADS_LEN_ITER_NTASKS.txt
