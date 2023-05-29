@@ -26,6 +26,9 @@ bin/%_seq: src/seq/%.c
 bin/%_omp: src/omp/%.c
 	$(CC) $(FLAGS) $^ -o $@ $(LFLAGS) -fopenmp
 
+bin/%_omp_mpi: src/mpi/%_omp.c
+	$(MPICC) $(FLAGS) $^ -o $@ $(LFLAGS) -fopenmp
+
 bin/%_mpi: src/mpi/%.c
 	$(MPICC) $(FLAGS) $^ -o $@ $(LFLAGS)
 
