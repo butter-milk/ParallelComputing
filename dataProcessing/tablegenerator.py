@@ -3,11 +3,15 @@ from tabulate import tabulate
 import os
 import itertools
 import numpy as np
+import pandas as pd
 
 # dataSEC = list([threads: int, n: int, iterations: int, seconds: float])
 dataSEC = []
 # dataGFLOPS = list([threads: int, n: int, iterations: int, Gflops/s: float])
 dataGFLOPS = []
+
+# dataGFLOPS = list([threads: int, n: int, iterations: int, seconds: float, Gflops/s: float])
+dataCSV = []
 
 
 def createTable(file, filename):
@@ -15,12 +19,12 @@ def createTable(file, filename):
     with open("latexTables.txt", "a+") as g:
         g.write(
             "threads = "
-            + filenamedata[2]
+            + filenamedata[5][:-4]
             + "n = "
             + filenamedata[3]
             + " iterations = "
             + filenamedata[4]
-            + "\n"
+            + "\\\\\n"
         )
         g.write("\\begin{tabular}{c|c}" + "\n")
         g.write("Time (s) & GFlops/s\\\\" + "\n")
@@ -28,12 +32,12 @@ def createTable(file, filename):
             for line in [l for l in f]:
                 data = line.split(" ")
                 g.write(
-                    data[0][: min(4, len(data[0]))]
+                    data[0][: min(5, len(data[0]))]
                     + " & "
-                    + data[1][: min(4, len(data[1]))]
+                    + data[1][: min(5, len(data[1]))]
                     + "\\\\"
                 )
-        g.write("\\end{tabular}" + "\n")
+        g.write("\\end{tabular}\\\\" + "\n")
 
 
 def dataToLists(file, filename):
@@ -42,17 +46,26 @@ def dataToLists(file, filename):
             data = line.split(" ")
             dataSEC.append(
                 [
-                    int(filename.split("_")[2]),
+                    int(filename.split("_")[5][:-4]),
                     int(filename.split("_")[3]),
-                    int(filename.split("_")[4][:-4]),
+                    int(filename.split("_")[4]),
                     float(data[0]),
                 ]
             )
             dataGFLOPS.append(
                 [
-                    int(filename.split("_")[2]),
+                    int(filename.split("_")[5][:-4]),
                     int(filename.split("_")[3]),
-                    int(filename.split("_")[4][:-4]),
+                    int(filename.split("_")[4]),
+                    float(data[1]),
+                ]
+            )
+            dataCSV.append(
+                [
+                    int(filename.split("_")[5][:-4]),
+                    int(filename.split("_")[3]),
+                    int(filename.split("_")[4]),
+                    float(data[0]),
                     float(data[1]),
                 ]
             )
@@ -142,9 +155,14 @@ def createPlots():
     return
 
 
+def createCSV():
+    pd.DataFrame(dataCSV).to_csv("data.csv")
+
+
 # DO STUFF WITH DATA
 for filename in os.listdir("../parallel_programs-master/results"):
     f = os.path.join("../parallel_programs-master/results", filename)
-    # createTable(f, filename)
+    createTable(f, filename)
     dataToLists(f, filename)
-createPlots()
+createCSV()
+# createPlots()
