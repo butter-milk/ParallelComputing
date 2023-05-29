@@ -9,7 +9,7 @@
 #SBATCH --time=00:05:00
 #SBATCH --output=reports/%j.out
 #SBATCH --job-name "n=LEN;i=ITER"
+#SBATCH --export=ALL,OMP_NUM_THREADS=OMPTHREADS
 
 make bin/stencil_opt_omp_mpi
-setenv OMP_NUM_THREADS OMPTHREADS
 mpirun bin/stencil_opt_omp_mpi LEN ITER >> results/mpi_stencil_OMPTHREADS_LEN_ITER_NTASKS.txt

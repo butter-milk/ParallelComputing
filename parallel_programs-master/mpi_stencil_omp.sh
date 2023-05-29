@@ -32,7 +32,7 @@ do
     sed -i "s/ITER/$2/g" mpi_omp_stencil_"$NTASKS".sh
     sbatch mpi_omp_stencil_"$NTASKS".sh
 
-    rm mpi_stencil_"$NTASKS".sh    
+    rm mpi_omp_stencil_"$NTASKS".sh    
 
     NODES=$(( 2 * NODES ))
 done
