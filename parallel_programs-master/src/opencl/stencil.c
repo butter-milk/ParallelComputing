@@ -95,7 +95,7 @@ int main(int argc, char **argv)
     in[n - 1] = 1000;
     REAL *out = malloc(n * sizeof(REAL));
 
-    //double duration;
+    double duration;
     TIME(duration, Stencil(&in, &out, n, iterations););
     printf("This took %lfs, or %lf Gflops/s\n", duration, iterations * (n-1) * 5 / 1000000000 /duration);
 
