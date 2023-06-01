@@ -88,12 +88,12 @@ int main(int argc, char **argv)
     size_t n = atoll(argv[1]);
     int iterations = atoi(argv[2]);
 
+
+    double duration;
     REAL *in = calloc(n, sizeof(REAL));
     in[0] = 100;
     in[n - 1] = 1000;
     REAL *out = malloc(n * sizeof(REAL));
-    (*out)[0] = (*in)[0];
-    (*out)[n - 1] = (*in)[n - 1];
 
     //double duration;
     TIME(duration, Stencil(&in, &out, n, iterations););
