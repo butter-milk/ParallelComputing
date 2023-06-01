@@ -60,7 +60,7 @@ void Stencil(REAL **in, REAL **out, size_t n, int iterations)
     err = initGPUVerbose();
 
     if( err == CL_SUCCESS) {
-        for (int t = 1; t <= 1 /*iterations*/; t++) {
+        for (int t = 1; t <= iterations; t++) {
             kernel = setupKernel( KernelSource, "stencil", 3, FloatArr, n, (*in),
                                                         FloatArr, n, (*out),
                                                         IntConst, n-1);
@@ -88,7 +88,7 @@ int main(int argc, char **argv)
     size_t n = atoll(argv[1]);
     int iterations = atoi(argv[2]);
 
-
+    n += n%32
     double duration;
     REAL *in = calloc(n, sizeof(REAL));
     in[0] = 100;
