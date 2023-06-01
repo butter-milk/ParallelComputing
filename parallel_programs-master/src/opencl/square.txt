@@ -1,0 +1,21 @@
+work group size: 32
+Platform[0]: Clover
+  no suitable device found
+Platform[1]: NVIDIA CUDA
+  Device[0]: 68 compute units
+             1024x1024x64 max local
+             10.76 GB gloabl mem
+>> Choosing platform 1
+allocating 39.06 MB on the device
+transferring 39.06 MB to device
+allocating 39.06 MB on the device
+transferring 39.06 MB to device
+Trying to launch a kernel with global [ 10240000 ] and local [ 32 ]
+transferring 39.06 MB to host
+transferring 39.06 MB to host
+total time spent in 1 kernel executions: 0.3 msec
+total time spent in 2 host to device transfers : 24.0 msec
+total time spent in 2 device to host transfers : 36.0 msec
+CPU time spent: 422.750998 msec
+Computed 10240000/10240000 100% correct values
+kernel equivalent on host: 31.720490 msec
