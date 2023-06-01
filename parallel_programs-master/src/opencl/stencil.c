@@ -53,7 +53,7 @@ void Stencil(REAL **in, REAL **out, size_t n, int iterations)
     size_t global[1];
     size_t local[1];
     local[0] = 32;
-    global[0] = n;
+    global[0] = n-1;
     /* Reading the openCL kernel code from 'stencil.cl' */
     char *KernelSource = readOpenCL( "src/opencl/stencil.cl");
 
@@ -63,7 +63,7 @@ void Stencil(REAL **in, REAL **out, size_t n, int iterations)
         for (int t = 1; t <= 1 /*iterations*/; t++) {
             kernel = setupKernel( KernelSource, "stencil", 3, FloatArr, n, (*in),
                                                         FloatArr, n, (*out),
-                                                        IntConst, n);
+                                                        IntConst, n-1);
 
             runKernel( kernel, 1, global, local);
                 /* The output of this iteration is the input of the next iteration (if there is one). */
