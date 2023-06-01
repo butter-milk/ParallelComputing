@@ -48,24 +48,33 @@ void Stencil(REAL **in, REAL **out, size_t n, int iterations)
     (*out)[0] = (*in)[0];
     (*out)[n - 1] = (*in)[n - 1];
 
-    for (int t = 1; t <= iterations; t++) {
-        /* Update only the inner values. */
+    cl_int err;
+    cl_kernel kernel;
+    size_t global[1];
+    size_t local[1];
+    local[0] = 32;
+    /* Reading the openCL kernel code from 'stencil.cl' */
+    char *KernelSource = readOpenCL( "src/opencl/stencil.cl");
 
-        /* For every i, we perform 5flops (2 addition and 3 multiplication operations )*/
-        /* So our total Gflops/s = iterations * (n-1) * 5 / 1000000000 /duration*/
-        for (int i = 1; i < n - 1; i++) {
-            (*out)[i] = a * (*in)[i - 1] +
-                        b * (*in)[i] +
-                        c * (*in)[i + 1];
-        }
+    err = initGPUVerbose();
 
-        /* The output of this iteration is the input of the next iteration (if there is one). */
-        if (t != iterations) {
-            REAL *temp = *in;
-            *in = *out;
-            *out = temp;
+    if( err == CL_SUCCESS) {
+        for (int t = 1; t <= 1 /*iterations*/; t++) {
+            kernel = setupKernel( KernelSource, "stencil", 3, FloatArr, n, (*in),
+                                                        FloatArr, n, (*out),
+                                                        IntConst, n);
+
+            runKernel( kernel, 1, global, local);
+                /* The output of this iteration is the input of the next iteration (if there is one). */
+            if (t != iterations) {
+                REAL *temp = *in;
+                *in = *out;
+                *out = temp;
+            }
         }
     }
+
+
 }
 
 int main(int argc, char **argv)
@@ -74,14 +83,6 @@ int main(int argc, char **argv)
         printf("Please specify 2 arguments (n, iterations).\n");
         return EXIT_FAILURE;
     }
-
-    cl_int err;
-    cl_kernel kernel;
-    size_t global[1];
-    size_t local[1];
-    local[0] = atoi(argv[1]);
-    /* Reading the openCL kernel code from 'stencil.cl' */
-    char *KernelSource = readOpenCL( "src/opencl/stencil.cl");
 
     size_t n = atoll(argv[1]);
     int iterations = atoi(argv[2]);
@@ -93,27 +94,9 @@ int main(int argc, char **argv)
     (*out)[0] = (*in)[0];
     (*out)[n - 1] = (*in)[n - 1];
 
-    err = initGPUVerbose();
-
-    if( err == CL_SUCCESS) {
-        for (int t = 1; t <= iterations; t++) {
-            kernel = setupKernel( KernelSource, "stencil", 3, FloatArr, count, data,
-                                                        FloatArr, count, results,
-                                                        IntConst, count);
-
-            runKernel( kernel, 1, global, local);
-
-            clock_gettime( CLOCK_PROCESS_CPUTIME_ID, &stop);
-            printKernelTime();
-            printTransferTimes();
-            printTimeElapsed( "CPU time spent");
-        }
-
-
-    }
     //double duration;
-    //TIME(duration, Stencil(&in, &out, n, iterations););
-    //printf("This took %lfs, or %lf Gflops/s\n", duration, iterations * (n-1) * 5 / 1000000000 /duration);
+    TIME(duration, Stencil(&in, &out, n, iterations););
+    printf("This took %lfs, or %lf Gflops/s\n", duration, iterations * (n-1) * 5 / 1000000000 /duration);
 
     free(in);
     free(out);
