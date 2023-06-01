@@ -1,0 +1,128 @@
+threads = 4n = 64000000 iterations = 10000\\
+\begin{tabular}{c|c}
+Time (s) & GFlops/s\\
+52.88 & 60.48\\52.88 & 60.49\\52.88 & 60.49\\52.87 & 60.50\\52.87 & 60.50\\\end{tabular}\\
+threads = 8n = 64000 iterations = 1000\\
+\begin{tabular}{c|c}
+Time (s) & GFlops/s\\
+0.019 & 0.000\\0.020 & 0.000\\0.019 & 0.000\\0.019 & 0.000\\0.020 & 0.000\\\end{tabular}\\
+threads = 1n = 6400000 iterations = 1000\\
+\begin{tabular}{c|c}
+Time (s) & GFlops/s\\
+2.143 & 14.46\\2.148 & 14.43\\2.141 & 14.47\\2.146 & 14.44\\2.143 & 14.46\\\end{tabular}\\
+threads = 1n = 640000 iterations = 10000\\
+\begin{tabular}{c|c}
+Time (s) & GFlops/s\\
+2.093 & 14.80\\2.094 & 14.80\\2.099 & 14.76\\2.094 & 14.79\\2.098 & 14.77\\\end{tabular}\\
+threads = 2n = 640000 iterations = 1000\\
+\begin{tabular}{c|c}
+Time (s) & GFlops/s\\
+0.127 & 23.60\\0.128 & 23.35\\0.126 & 23.68\\0.125 & 23.81\\0.127 & 23.58\\\end{tabular}\\
+threads = 8n = 6400000 iterations = 1000\\
+\begin{tabular}{c|c}
+Time (s) & GFlops/s\\
+0.289 & 106.9\\0.289 & 107.0\\0.290 & 106.7\\0.290 & 106.7\\0.289 & 106.9\\\end{tabular}\\
+threads = 2n = 640000 iterations = 10000\\
+\begin{tabular}{c|c}
+Time (s) & GFlops/s\\
+1.078 & 28.75\\1.077 & 28.77\\1.077 & 28.75\\1.077 & 28.76\\1.079 & 28.70\\\end{tabular}\\
+threads = 1n = 64000000 iterations = 10000\\
+\begin{tabular}{c|c}
+Time (s) & GFlops/s\\
+211.0 & 15.15\\\end{tabular}\\
+threads = 1n = 64000000 iterations = 1000\\
+\begin{tabular}{c|c}
+Time (s) & GFlops/s\\
+21.45 & 14.86\\21.43 & 14.88\\21.42 & 14.89\\21.43 & 14.87\\21.44 & 14.87\\\end{tabular}\\
+threads = 1n = 64000 iterations = 1000\\
+\begin{tabular}{c|c}
+Time (s) & GFlops/s\\
+0.029 & 0.000\\0.029 & 0.000\\0.029 & 0.000\\0.030 & 0.000\\0.029 & 0.000\\\end{tabular}\\
+threads = 4n = 6400000 iterations = 1000\\
+\begin{tabular}{c|c}
+Time (s) & GFlops/s\\
+0.557 & 55.63\\0.567 & 54.60\\0.557 & 55.61\\0.557 & 55.57\\0.556 & 55.68\\\end{tabular}\\
+threads = 1n = 64000 iterations = 10000\\
+\begin{tabular}{c|c}
+Time (s) & GFlops/s\\
+0.223 & 13.41\\0.224 & 13.36\\0.223 & 13.40\\0.223 & 13.39\\0.224 & 13.38\\\end{tabular}\\
+threads = 4n = 640000 iterations = 1000\\
+\begin{tabular}{c|c}
+Time (s) & GFlops/s\\
+0.074 & 40.07\\0.074 & 40.39\\0.074 & 40.23\\0.075 & 39.96\\0.075 & 39.71\\\end{tabular}\\
+threads = 8n = 6400000 iterations = 10000\\
+\begin{tabular}{c|c}
+Time (s) & GFlops/s\\
+2.677 & 119.1\\2.667 & 119.5\\2.676 & 119.1\\2.666 & 119.6\\2.667 & 119.5\\\end{tabular}\\
+threads = 2n = 64000000 iterations = 1000\\
+\begin{tabular}{c|c}
+Time (s) & GFlops/s\\
+10.74 & 29.68\\10.75 & 29.65\\10.73 & 29.71\\10.75 & 29.66\\10.74 & 29.68\\\end{tabular}\\
+threads = 1n = 640000 iterations = 1000\\
+\begin{tabular}{c|c}
+Time (s) & GFlops/s\\
+0.220 & 13.61\\0.221 & 13.55\\0.220 & 13.59\\0.220 & 13.62\\0.217 & 13.82\\\end{tabular}\\
+threads = 4n = 6400000 iterations = 10000\\
+\begin{tabular}{c|c}
+Time (s) & GFlops/s\\
+5.305 & 60.12\\5.302 & 60.16\\5.303 & 60.14\\5.311 & 60.05\\5.305 & 60.12\\\end{tabular}\\
+threads = 4n = 64000000 iterations = 1000\\
+\begin{tabular}{c|c}
+Time (s) & GFlops/s\\
+5.384 & 59.24\\5.386 & 59.21\\5.382 & 59.26\\5.385 & 59.23\\5.380 & 59.28\\\end{tabular}\\
+threads = 8n = 640000 iterations = 1000\\
+\begin{tabular}{c|c}
+Time (s) & GFlops/s\\
+0.045 & 65.70\\0.045 & 65.33\\0.045 & 65.59\\0.045 & 65.82\\0.046 & 64.67\\\end{tabular}\\
+threads = 2n = 6400000 iterations = 10000\\
+\begin{tabular}{c|c}
+Time (s) & GFlops/s\\
+10.56 & 30.18\\10.56 & 30.18\\10.57 & 30.16\\10.56 & 30.20\\10.57 & 30.17\\\end{tabular}\\
+threads = 4n = 640000 iterations = 10000\\
+\begin{tabular}{c|c}
+Time (s) & GFlops/s\\
+0.563 & 55.02\\0.563 & 54.97\\0.563 & 55.05\\0.563 & 55.06\\0.562 & 55.08\\\end{tabular}\\
+threads = 8n = 64000 iterations = 10000\\
+\begin{tabular}{c|c}
+Time (s) & GFlops/s\\
+0.064 & 46.27\\0.072 & 41.27\\0.065 & 45.83\\0.065 & 45.75\\0.065 & 45.98\\\end{tabular}\\
+threads = 4n = 64000 iterations = 1000\\
+\begin{tabular}{c|c}
+Time (s) & GFlops/s\\
+0.021 & 0.000\\0.022 & 0.000\\0.022 & 0.000\\0.021 & 0.000\\0.022 & 0.000\\\end{tabular}\\
+threads = 1n = 6400000 iterations = 10000\\
+\begin{tabular}{c|c}
+Time (s) & GFlops/s\\
+21.08 & 15.12\\21.08 & 15.13\\21.07 & 15.13\\21.07 & 15.13\\21.08 & 15.12\\\end{tabular}\\
+threads = 8n = 64000000 iterations = 10000\\
+\begin{tabular}{c|c}
+Time (s) & GFlops/s\\
+26.45 & 120.9\\26.44 & 120.9\\26.44 & 120.9\\26.45 & 120.9\\26.44 & 120.9\\\end{tabular}\\
+threads = 4n = 64000 iterations = 10000\\
+\begin{tabular}{c|c}
+Time (s) & GFlops/s\\
+0.090 & 33.29\\0.090 & 33.15\\0.090 & 33.30\\0.089 & 33.46\\0.090 & 33.27\\\end{tabular}\\
+threads = 2n = 64000 iterations = 10000\\
+\begin{tabular}{c|c}
+Time (s) & GFlops/s\\
+0.139 & 21.48\\0.139 & 21.52\\0.139 & 21.48\\0.140 & 21.32\\0.140 & 21.39\\\end{tabular}\\
+threads = 2n = 6400000 iterations = 1000\\
+\begin{tabular}{c|c}
+Time (s) & GFlops/s\\
+1.090 & 28.41\\1.094 & 28.33\\1.089 & 28.46\\1.091 & 28.41\\1.090 & 28.41\\\end{tabular}\\
+threads = 2n = 64000 iterations = 1000\\
+\begin{tabular}{c|c}
+Time (s) & GFlops/s\\
+0.027 & 0.000\\0.026 & 0.000\\0.026 & 0.000\\0.027 & 0.000\\0.026 & 0.000\\\end{tabular}\\
+threads = 8n = 640000 iterations = 10000\\
+\begin{tabular}{c|c}
+Time (s) & GFlops/s\\
+0.301 & 102.9\\0.301 & 102.8\\0.300 & 103.0\\0.301 & 102.8\\0.301 & 102.8\\\end{tabular}\\
+threads = 8n = 64000000 iterations = 1000\\
+\begin{tabular}{c|c}
+Time (s) & GFlops/s\\
+2.702 & 118.0\\2.700 & 118.1\\2.710 & 117.6\\2.701 & 118.0\\2.703 & 118.0\\\end{tabular}\\
+threads = 2n = 64000000 iterations = 10000\\
+\begin{tabular}{c|c}
+Time (s) & GFlops/s\\
+105.7 & 30.24\\105.7 & 30.25\\\end{tabular}\\
