@@ -43,6 +43,20 @@ const REAL a = 0.1;
 const REAL b = 0.2;
 const REAL c = 0.3;
 
+#define SETUPARG( tname, t)                                                      \
+case tname ## Arr:                                                               \
+   kernel_args[i].num_elems = va_arg(ap, int);                                   \
+   kernel_args[i].t##_host_buf = va_arg(ap, t *);                                \
+   kernel_args[i].dev_buf = allocDev ( sizeof (t) * kernel_args[i].num_elems);   \
+   host2dev ## tname ## Arr ( kernel_args[i].t##_host_buf,                       \
+                              kernel_args[i].dev_buf, kernel_args[i].num_elems); \
+   err = clSetKernelArg (kernel, i, sizeof (cl_mem), &kernel_args[i].dev_buf);   \
+   if( CL_SUCCESS != err) {                                                      \
+      die ("Error: Failed to set kernel arg %d!", i);                            \
+      kernel = NULL;                                                             \
+   }                                                                             \
+break;
+
 void Stencil(REAL **in, REAL **out, size_t n, int iterations)
 {
     (*out)[0] = (*in)[0];
@@ -61,16 +75,22 @@ void Stencil(REAL **in, REAL **out, size_t n, int iterations)
 
     if( err == CL_SUCCESS) {
         for (int t = 1; t <= iterations; t++) {
-            kernel = setupKernel( KernelSource, "stencil", 3, FloatArr, n, (*in),
-                                                        FloatArr, n, (*out),
-                                                        IntConst, n-1);
 
-            runKernel( kernel, 1, global, local);
-                /* The output of this iteration is the input of the next iteration (if there is one). */
-            if (t != iterations) {
-                REAL *temp = *in;
-                *in = *out;
-                *out = temp;
+            if(t%2){
+                kernel = setupKernel( KernelSource, "stencil", 3, FloatArr, n, (*in),
+                                                            FloatArr, n, (*out),
+                                                            IntConst, n-1);
+            }else{
+                kernel = setupKernel( KernelSource, "stencil", 3, FloatArr, n, (*out),
+                                            FloatArr, n, (*in),
+                                            IntConst, n-1);
+            }
+            //switch in and out pointers in kernel
+            if (t==iterations){
+                runKernel( kernel, 1, global, local);
+            }else{
+                launchKernel( kernel, 1, global, local);
+
             }
         }
     }
