@@ -64,14 +64,14 @@ void Stencil(REAL **in, REAL **out, size_t n, int iterations)
                                             IntConst, n-1);
         for (int t = 1; t <= iterations; t++) {
 
-            if(t%2){
+            //if(t%2){
                 //clSetKernelArg(kernel, 0, sizeof(cl_mem), &in);
                 //clSetKernelArg(kernel, 1, sizeof(cl_mem), &out);
 
-            }else{
+            //}else{
                 //clSetKernelArg(kernel, 0, sizeof(cl_mem), &out);
                 //clSetKernelArg(kernel, 1, sizeof(cl_mem), &in);
-            }
+            //}
             //switch in and out pointers in kernel
             if (t==iterations){
                 runKernel( kernel, 1, global, local);
