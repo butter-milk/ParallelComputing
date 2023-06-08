@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 #include <sys/time.h>
 
 #include "../simple.h"
@@ -64,20 +63,20 @@ void Stencil(REAL **in, REAL **out, size_t n, int iterations)
                                             IntConst, n-1);
         for (int t = 1; t <= iterations; t++) {
 
-            //if(t%2){
-            //    clSetKernelArg(kernel, 0, sizeof(cl_mem), &in);
-            //    clSetKernelArg(kernel, 1, sizeof(cl_mem), &out);
+            if(t%2){
+                clSetKernelArg(kernel, 0, sizeof(cl_mem), &in);
+                clSetKernelArg(kernel, 1, sizeof(cl_mem), &out);
 
-            //}else{
-            //    clSetKernelArg(kernel, 0, sizeof(cl_mem), &out);
-            //    clSetKernelArg(kernel, 1, sizeof(cl_mem), &in);
-            //}
+            }else{
+                clSetKernelArg(kernel, 0, sizeof(cl_mem), &out);
+                clSetKernelArg(kernel, 1, sizeof(cl_mem), &in);
+            }
             //switch in and out pointers in kernel
-            //if (t==iterations){
+            if (t==iterations){
                 runKernel( kernel, 1, global, local);
-            //}else{
-            //    launchKernel( kernel, 1, global, local);
-            //}
+            }else{
+                launchKernel( kernel, 1, global, local);
+            }
         }
     }
 
