@@ -58,7 +58,6 @@ void Stencil(REAL **in, REAL **out, size_t n, int iterations)
     char *KernelSource = readOpenCL( "src/opencl/stencil.cl");
 
     err = initGPUVerbose();
-    cl_mem buffer, buffer2;
     if( err == CL_SUCCESS) {
         kernel = setupKernel( KernelSource, "stencil", 3, FloatArr, n, (*in),
                                             FloatArr, n, (*out),
@@ -95,7 +94,7 @@ int main(int argc, char **argv)
     size_t n = atoll(argv[1]);
     int iterations = atoi(argv[2]);
 
-    n += n%32
+    n += n%32;
     double duration;
     REAL *in = calloc(n, sizeof(REAL));
     in[0] = 100;
