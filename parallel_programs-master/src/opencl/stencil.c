@@ -95,7 +95,6 @@ int main(int argc, char **argv)
     int iterations = atoi(argv[2]);
 
     n += n%32;
-    double duration;
     REAL *in = calloc(n, sizeof(REAL));
     in[0] = 100;
     in[n - 1] = 1000;
