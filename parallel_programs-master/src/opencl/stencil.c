@@ -76,7 +76,7 @@ void Stencil(REAL **in, REAL **out, size_t n, int iterations)
             if (t==iterations){
                 runKernel( kernel, 1, global, local);
             }else{
-                continue
+                continue;
             //    launchKernel( kernel, 1, global, local);
             }
         }
