@@ -74,7 +74,7 @@ void Stencil(REAL **in, REAL **out, size_t n, int iterations)
             }
             //switch in and out pointers in kernel
             if (t==iterations){
-            //    runKernel( kernel, 1, global, local);
+                runKernel( kernel, 1, global, local);
             }else{
             //    launchKernel( kernel, 1, global, local);
             }
