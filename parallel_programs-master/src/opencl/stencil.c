@@ -59,8 +59,6 @@ void Stencil(REAL **in, REAL **out, size_t n, int iterations)
 
     err = initGPUVerbose();
     cl_mem buffer, buffer2;
-    buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float) * size, new_array1_pointer, NULL);
-    buffer2 = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float) * size, new_array1_pointer, NULL);
     if( err == CL_SUCCESS) {
         kernel = setupKernel( KernelSource, "stencil", 3, FloatArr, n, (*in),
                                             FloatArr, n, (*out),
