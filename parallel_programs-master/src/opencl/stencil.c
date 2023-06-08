@@ -59,9 +59,9 @@ void Stencil(REAL **in, REAL **out, size_t n, int iterations)
 
     err = initGPUVerbose();
     if( err == CL_SUCCESS) {
-        //kernel = setupKernel( KernelSource, "stencil", 3, FloatArr, n, (*in),
-        //                                    FloatArr, n, (*out),
-        //                                    IntConst, n-1);
+        kernel = setupKernel( KernelSource, "stencil", 3, FloatArr, n, (*in),
+                                            FloatArr, n, (*out),
+                                            IntConst, n-1);
         for (int t = 1; t <= iterations; t++) {
 
             if(t%2){
