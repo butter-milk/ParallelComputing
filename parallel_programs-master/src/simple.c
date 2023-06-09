@@ -89,7 +89,7 @@ char *readOpenCL( char *fname)
 
    f = fopen(fname, "r");
    if (f==NULL)
-      die ( "Error: file \"%s\" not found!", fname);
+  //    die ( "Error: file \"%s\" not found!", fname);
 
    fseek(f, 0, SEEK_END);
    fsize = ftell(f);
@@ -97,9 +97,9 @@ char *readOpenCL( char *fname)
 
    str = (char *)malloc(fsize + 1);
    if (str == NULL)
-      die ("Error: failed to allocate memory for kernel of size %ld", fsize+1);
+  //    die ("Error: failed to allocate memory for kernel of size %ld", fsize+1);
    if (fread(str, 1, fsize, f) != fsize) {
-      die ("Error: fread failed to read %ld items", fsize);
+  //    die ("Error: fread failed to read %ld items", fsize);
    }
    fclose(f);
 
@@ -115,7 +115,7 @@ char *getPlatformName( cl_platform_id platform)
 
   err = clGetPlatformInfo( platform, CL_PLATFORM_NAME,0,NULL,&size);
   if (CL_SUCCESS != err) {
-    die ("Error: Failed to obtain platform info!");
+  //  die ("Error: Failed to obtain platform info!");
   } else {
     res = (char *)realloc( res, sizeof(char) * size + 1);
     err = clGetPlatformInfo( platform, CL_PLATFORM_NAME,size+1,res,NULL);
@@ -130,7 +130,7 @@ cl_uint getDeviceMaxComputeUnits( cl_device_id device)
 
   err = clGetDeviceInfo( device, CL_DEVICE_MAX_COMPUTE_UNITS,sizeof(cl_uint),&res,NULL);
   if (CL_SUCCESS != err) {
-    die ("Error: Failed to obtain device info!");
+  //  die ("Error: Failed to obtain device info!");
   }
   return res;
 }
@@ -142,7 +142,7 @@ cl_ulong getMaxAlloc( cl_device_id device)
 
   err = clGetDeviceInfo( device, CL_DEVICE_MAX_MEM_ALLOC_SIZE,sizeof(cl_ulong),&res,NULL);
   if (CL_SUCCESS != err) {
-    die ("Error: Failed to obtain device info!");
+  //  die ("Error: Failed to obtain device info!");
   }
   return res;
 }
@@ -154,7 +154,7 @@ cl_ulong getMemSize( cl_device_id device)
 
   err = clGetDeviceInfo( device, CL_DEVICE_GLOBAL_MEM_SIZE,sizeof(cl_ulong),&res,NULL);
   if (CL_SUCCESS != err) {
-    die ("Error: Failed to obtain device info!");
+  //  die ("Error: Failed to obtain device info!");
   }
   return res;
 }
@@ -172,12 +172,12 @@ size_t getDeviceMaxWorkItems( cl_device_id device, int dim)
                             &max,
                             NULL);
       if (CL_SUCCESS != err) {
-         die ("Error: Failed to get device info on work item sizes!");
+     //    die ("Error: Failed to get device info on work item sizes!");
       } else {
          maxWI = max[dim];
       }
    } else {
-      die ("Error: maxWorkItems called with illegal parameter!");
+    //  die ("Error: maxWorkItems called with illegal parameter!");
    }
 
   return maxWI;
@@ -194,7 +194,7 @@ cl_int initDevice ( int devType)
   /* Connect to a compute device.  */
   err = clGetPlatformIDs (0, NULL, &num_platforms);
   if (CL_SUCCESS != err) {
-    die ("Error: Failed to find a platform!");
+  //  die ("Error: Failed to find a platform!");
   } else {
     cpPlatforms = (cl_platform_id *)malloc( sizeof( cl_platform_id)*num_platforms);
     err = clGetPlatformIDs(num_platforms, cpPlatforms, NULL);
@@ -226,12 +226,12 @@ cl_int initDevice ( int devType)
         }
     }
     if (err != CL_SUCCESS) {
-      die ("Error: Failed to find a suitable platform!");
+    //  die ("Error: Failed to find a suitable platform!");
     } else {
       /* Create a compute context.  */
       context = clCreateContext (0, 1, &device_id, NULL, NULL, &err);
       if (!context || err != CL_SUCCESS) {
-        die ("Error: Failed to create a compute context!");
+      //  die ("Error: Failed to create a compute context!");
       } else {
         /* Create a command commands.  */
 #ifdef CL_VERSION_2_0
@@ -240,7 +240,7 @@ cl_int initDevice ( int devType)
         commands = clCreateCommandQueue (context, device_id, 0, &err);
 #endif
         if (!commands || err != CL_SUCCESS) {
-          die ("Error: Failed to create a command commands!");
+        //  die ("Error: Failed to create a command commands!");
         }
       }
     }
@@ -285,7 +285,7 @@ cl_mem allocDev( size_t n)
      printf( "allocating %s on the device\n", getMemStr( n));
    mem = clCreateBuffer (context, CL_MEM_READ_WRITE, n, NULL, &err);
    if( err != CL_SUCCESS || mem == NULL)
-      die ("Error: Failed to allocate device memory!");
+    //  die ("Error: Failed to allocate device memory!");
 
    return mem;
 }
@@ -297,13 +297,13 @@ void host2dev ##tname ##Arr( t *a, cl_mem ad, size_t n)                         
                                                                                 \
    clock_gettime( CLOCK_REALTIME, &start);                                      \
    if (verbose)                                                                 \
-      printf( "transferring %s to device\n", getMemStr( sizeof (t) * n));       \
+      /*printf( "transferring %s to device\n", getMemStr( sizeof (t) * n));*/       \
    err = clEnqueueWriteBuffer( commands, ad, CL_TRUE, 0,                        \
                                sizeof (t) * n,                                  \
                                a, 0, NULL, NULL);                               \
-   if( CL_SUCCESS != err) {                                                     \
+   /*if( CL_SUCCESS != err) {                                                     \
       die ("Error: Failed to transfer from host to device!");                   \
-   }                                                                            \
+   } */                                                                           \
    clock_gettime( CLOCK_REALTIME, &stop);                                       \
    num_h2d++;                                                                   \
    h2d_time += (stop.tv_sec -start.tv_sec)*1000.0                               \
@@ -326,9 +326,9 @@ void dev2host ##tname ##Arr( cl_mem ad, t* a, size_t n)                        \
    err = clEnqueueReadBuffer( commands, ad, CL_TRUE, 0,                        \
                               sizeof (t) * n,                                  \
                               a, 0, NULL, NULL);                               \
-   if( CL_SUCCESS != err) {                                                    \
+   /*if( CL_SUCCESS != err) {                                                    \
       die ("Error: Failed to transfer from device to host!");                  \
-   }                                                                           \
+   } */                                                                          \
    clock_gettime( CLOCK_REALTIME, &stop);                                      \
    num_d2h++;                                                                  \
    d2h_time += (stop.tv_sec -start.tv_sec)*1000.0                              \
@@ -351,7 +351,7 @@ cl_kernel createKernel( const char *kernel_source, char *kernel_name)
                                        (const char **) &kernel_source,
                                        NULL, &err);
   if (!program || err != CL_SUCCESS) {
-    die ("Error: Failed to create compute program!");
+   // die ("Error: Failed to create compute program!");
   }
 
   /* Build the program executable.  */
@@ -363,13 +363,13 @@ cl_kernel createKernel( const char *kernel_source, char *kernel_name)
 
       clGetProgramBuildInfo (program, device_id, CL_PROGRAM_BUILD_LOG,
                              sizeof (buffer), buffer, &len);
-      die ("Error: Failed to build program executable!\n%s", buffer);
+     // die ("Error: Failed to build program executable!\n%s", buffer);
     }
 
   /* Create the compute kernel in the program.  */
   kernel = clCreateKernel (program, kernel_name, &err);
   if (!kernel || err != CL_SUCCESS) {
-    die ("Error: Failed to create compute kernel!");
+   // die ("Error: Failed to create compute kernel!");
     kernel = NULL;
   }
   return kernel;
@@ -384,7 +384,7 @@ case tname ## Arr:                                                              
                               kernel_args[i].dev_buf, kernel_args[i].num_elems); \
    err = clSetKernelArg (kernel, i, sizeof (cl_mem), &kernel_args[i].dev_buf);   \
    if( CL_SUCCESS != err) {                                                      \
-      die ("Error: Failed to set kernel arg %d!", i);                            \
+      /*die ("Error: Failed to set kernel arg %d!", i);*/                            \
       kernel = NULL;                                                             \
    }                                                                             \
 break;
@@ -410,12 +410,12 @@ cl_kernel setupKernel( const char *kernel_source, char *kernel_name, int num_arg
           kernel_args[i].val = va_arg(ap, unsigned int);
           err = clSetKernelArg (kernel, i, sizeof (unsigned int), &kernel_args[i].val);
           if( CL_SUCCESS != err) {
-            die ("Error: Failed to set kernel arg %d!", i);
+            /*die ("Error: Failed to set kernel arg %d!", i);*/
             kernel = NULL;
           }
           break;
         default:
-          die ("Error: illegal argument tag for executeKernel!");
+          //die ("Error: illegal argument tag for executeKernel!");
           kernel = NULL;
       }
    }
@@ -429,7 +429,7 @@ cl_int launchKernel( cl_kernel kernel, int dim, size_t *global, size_t *local)
   cl_int err;
 
   if (verbose) {
-    printf( "Trying to launch a kernel with global [ ");
+    //printf( "Trying to launch a kernel with global [ ");
     for(int i=0; i<dim; i++) {
       printf( "%zu ", global[i]);
     }
@@ -454,7 +454,7 @@ cl_int launchKernel( cl_kernel kernel, int dim, size_t *global, size_t *local)
       }
       printf( "]\n");
     }
-    die ("Error: Failed to execute kernel!");
+    //die ("Error: Failed to execute kernel!");
   }
 
   /* Wait for all commands to complete.  */
@@ -490,7 +490,7 @@ cl_int runKernel( cl_kernel kernel, int dim, size_t *global, size_t *local)
               /* do nothing */
               break;
           default:
-              die ("Error: illegal argument tag in runKernel!");
+              //die ("Error: illegal argument tag in runKernel!");
               kernel = NULL;
       }
   }
